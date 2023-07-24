@@ -1,0 +1,37 @@
+@ IN SOA ns1.sinavir.fr. dns.sinavir.fr. 10 86400 7200 3600000 172800
+@ IN NS ns1.sinavir.fr.
+@ IN NS ns2.sinavir.fr.
+                        IN A      51.210.243.54
+                        IN AAAA   2001:41d0:404:200::81a1
+                        IN MX     10 mail
+                    600 IN TXT    "v=spf1 a:mail.sinavir.fr -all"
+proxima                 IN A      51.210.243.54
+proxima                 IN AAAA   2001:41d0:404:200::81a1
+schedar                 IN A      51.15.171.220
+schedar                 IN AAAA   2001:bc8:34d0::1
+algedi                  IN A      45.13.104.28
+algedi                  IN AAAA   2001:470:1f13:187:b256:8cb7:beb0:9d45
+rigel                   IN AAAA   2001:470:1f13:187:c664:7fd5:e892:b648
+
+ns1                     IN A      51.15.171.220
+ns1                     IN AAAA   2001:bc8:34d0::1
+ns2                     IN A      51.210.243.54
+ns2                     IN AAAA   2001:41d0:404:200::81a1
+
+_dmarc                  IN TXT    ( "v=DMARC1;p=none;" )
+mail                    IN A      51.210.243.54
+mail                    IN AAAA   2001:41d0:404:200::81a1
+mail._domainkey         IN TXT    ( "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBhTFveZHJ31GccPmatMS3P9IH4tOUf2lnEM80vEHPwJSLi1Fpj5n2yEp8c8Gpah2aNE0Re6O2bczHbsIZzS+VROtqnvUs6/6xR3OIC1Dr/q5Vh1w6gc4l/plmvrgv4qJ64YjrBHvw4djuu8tcg4hjlo5nIEYeSUm8YHdpxWlUxwIDAQAB" )
+
+wishper                 IN CNAME  schedar
+netbox.dgnum            IN CNAME  schedar
+auth                    IN CNAME  proxima
+irc                     IN CNAME  proxima
+kfet                    IN CNAME  proxima
+pass                    IN CNAME  proxima
+rz                      IN CNAME  proxima
+vpn                     IN CNAME  proxima
+www                     IN CNAME  proxima
+beta                    IN CNAME  algedi
+pub.calendar            IN CNAME  proxima
+priv.calendar           IN CNAME  proxima

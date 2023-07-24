@@ -1,0 +1,102 @@
+{
+  "pins": {
+    "agenix": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "ryantm",
+        "repo": "agenix"
+      },
+      "branch": "main",
+      "revision": "0d8c5325fc81daf00532e3e26c6752f7bcde1143",
+      "url": "https://github.com/ryantm/agenix/archive/0d8c5325fc81daf00532e3e26c6752f7bcde1143.tar.gz",
+      "hash": "1j9yr5q0453wnmn8941vfppwfsqmx98nk1ajqqw4zjgmkc0kjfbn"
+    },
+    "disko": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "disko"
+      },
+      "branch": "master",
+      "revision": "7eb09408393faa5b8f3b3524c39cb93d938e8d04",
+      "url": "https://github.com/nix-community/disko/archive/7eb09408393faa5b8f3b3524c39cb93d938e8d04.tar.gz",
+      "hash": "1d67hsw9zl4x3k4h5489px8jlvdlzrz7n4h12m8fk4h1kh6c4w7k"
+    },
+    "dns.nix": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "kirelagin",
+        "repo": "dns.nix"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "version": "v1.1.2",
+      "revision": "c7b9645da9c0ddce4f9de4ef27ec01bb8108039a",
+      "url": "https://api.github.com/repos/kirelagin/dns.nix/tarball/v1.1.2",
+      "hash": "1b95dh15zl0qaf9fvvvvqlambm3plndpy24wwlib0sy4d0zq6y0h"
+    },
+    "home-manager": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "home-manager"
+      },
+      "branch": "master",
+      "revision": "2f84579a70b8c74e5ebb37299a0c3ba279f09382",
+      "url": "https://github.com/nix-community/home-manager/archive/2f84579a70b8c74e5ebb37299a0c3ba279f09382.tar.gz",
+      "hash": "08q1p8x2sbxndkdb7012agamlg1x0b9vl44lhh7r2bb9j67vd6y9"
+    },
+    "nixos-anywhere": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "numtide",
+        "repo": "nixos-anywhere"
+      },
+      "branch": "main",
+      "revision": "11d3803cc6669903f85dea29fa3f77481e22916f",
+      "url": "https://github.com/numtide/nixos-anywhere/archive/11d3803cc6669903f85dea29fa3f77481e22916f.tar.gz",
+      "hash": "0baff9nccn72ginlwhxmzrhryy8p0hfi1z4xmw1gklknaxh42djw"
+    },
+    "nixos-mailserver": {
+      "type": "Git",
+      "repository": {
+        "type": "Git",
+        "url": "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver.git"
+      },
+      "branch": "master",
+      "revision": "a3b03d1b5af5112bc94b448879a2f401043b42ea",
+      "url": null,
+      "hash": "0wxx96k10la8spgixjad3hn7rzm4xnnxwggi8823z9wa7s2a3zw3"
+    },
+    "nixos-stable": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "nixos-22.11",
+      "revision": "ea4c80b39be4c09702b0cb3b42eab59e2ba4f24b",
+      "url": "https://github.com/NixOS/nixpkgs/archive/ea4c80b39be4c09702b0cb3b42eab59e2ba4f24b.tar.gz",
+      "hash": "1xi53rlslcprybsvrmipm69ypd3g3hr7wkxvzc73ag8296yclyll"
+    },
+    "nixos-unstable": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "nixos-unstable",
+      "revision": "6cee3b5893090b0f5f0a06b4cf42ca4e60e5d222",
+      "url": "https://github.com/NixOS/nixpkgs/archive/6cee3b5893090b0f5f0a06b4cf42ca4e60e5d222.tar.gz",
+      "hash": "088yi2181nfyxalkg0g84jv4jcmxclihnrcaywfmxqzz61vr8x4f"
+    }
+  },
+  "version": 3
+}

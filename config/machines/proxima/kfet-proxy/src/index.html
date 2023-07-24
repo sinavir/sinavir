@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Ouverture K-Fêt</title>
+<style>
+#main {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  text-align: center;
+  font-weight: bold;
+  font-size: 15vw;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.red {
+  background-color: red;
+  color: white;
+}
+
+.orange {
+  background-color: orange;
+  color: black;
+}
+
+
+.green {
+  background-color: green;
+  color: white;
+}
+
+#main > p {
+  overflow: hidden;
+  display: none;
+}
+
+.orange > #orange {
+  display: block;
+}
+
+.green > #green {
+  display: block;
+}
+
+.red > #red {
+  display: block;
+}
+
+</style>
+    <link rel="manifest" href="manifest.webmanifest" />
+  </head>
+  <body>
+    <div id="main" class="orange">
+      <p id="orange">Non défini</p>
+      <p id="red">Fermé</p>
+      <p id="green">Ouvert</p>
+    </div>
+    <script>
+// Créer une connexion WebSocket
+const socket = new WebSocket('wss://kfet.sinavir.fr/ws/');
+const div = document.getElementById("main");
+
+// Écouter les messages
+socket.addEventListener('message', function (event) {
+  console.log('Voici un message du serveur', event.data);
+  switch (JSON.parse(event.data).status) {
+    case "opened":
+      div.className = "green";
+      document.title = "🟢 Ouvert | K-Fêt";
+      break;
+    case "closed":
+      div.className = "red";
+      document.title = "🔴 Fermé | K-Fêt";
+      break;
+    default:
+      div.className = "orange";
+      document.title = "🟠 Indéfini | K-Fêt";
+  }
+});
+</script>
+  </body>
+</html>

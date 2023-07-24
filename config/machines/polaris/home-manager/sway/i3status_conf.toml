@@ -1,0 +1,68 @@
+# vi:syntax=toml
+
+[theme]
+theme = "plain"
+
+[theme.overrides]
+separator = ""
+idle_bg = "#000000"
+idle_fg = "#e0e0e0"
+info_bg = "#76c7b7"
+info_fg = "#000000"
+good_bg = "#a1c659"
+good_fg = "#000000"
+warning_bg = "#6fb3d2"
+warning_fg = "#000000"
+critical_bg = "#fb0120"
+critical_fg = "#000000"
+
+[icons]
+icons = "awesome5"
+
+[[block]]
+block = "cpu"
+
+[[block]]
+block = "memory"
+format = " $icon $mem_total_used_percents.eng(w:2) "
+format_alt = " $icon_swap $swap_used_percents.eng(w:2) "
+
+[[block]]
+block = "disk_space"
+path="/"
+format = " $icon /: $available.eng(w:2) "
+info_type = "used"
+warning = 80
+alert = 90
+
+[[block]]
+block = "disk_space"
+path="/home"
+format = " $icon /home: $available.eng(w:2) "
+info_type = "used"
+warning = 80
+alert = 90
+
+[[block]]
+block = "net"
+format = " $icon {$signal_strength $ssid|Wired}  {$ip|NoV4}/{$ipv6|NoV6} d:$speed_down u:$speed_up via $device "
+
+[[block]]
+block = "backlight"
+invert_icons = true
+
+[[block]]
+block = "battery"
+
+[[block]]
+block = "sound"
+headphones_indicator = true
+show_volume_when_muted = true
+[[block.click]]
+button = "left"
+cmd = "pavucontrol"
+
+[[block]]
+block = "time"
+interval = 1
+format = " $timestamp.datetime(f:'%a-%m-%d %T') "

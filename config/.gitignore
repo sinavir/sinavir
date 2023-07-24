@@ -1,0 +1,4 @@
+/configuration.nix
+result
+*.swp
+/nix/current-nixos.nix
