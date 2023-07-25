@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+PROJECTS=$(git diff --cached --name-only | cut -d '/' -f 1 | sort -u)
+
+test "$PROJECTS" = "$(cut -d ':' -f 1 "$1")" ||
+	( echo "Commit message must have the form PROJECT: MSG"; exit 1 )
