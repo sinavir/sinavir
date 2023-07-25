@@ -1,0 +1,598 @@
+diff --git a/run-tests.sh b/run-tests.sh
+index 0d3da99..1fba2e8 100644
+--- a/run-tests.sh
++++ b/run-tests.sh
+@@ -23,5 +23,6 @@ trap 'rm ${CONFIG_FILE}' EXIT
+ 
+ export GIT_CONFIG_GLOBAL=${CONFIG_FILE}
+ #git config --global init.defaultBranch master
++git config --global protocol.file.allow always
+ 
+ python3 -m cram "$@"
+diff --git a/shell.nix b/shell.nix
+index 267b611..92daf91 100644
+--- a/shell.nix
++++ b/shell.nix
+@@ -1,17 +1,4 @@
+-with (import <nixpkgs> {});
+-
+-let
+-  extra_deps = if stdenv.isDarwin then [
+-    darwin.apple_sdk.frameworks.Security
+-  ] else [];
+-  pkgs = import ( fetchTarball {
+-      name = "nixos-21.11";
+-      url =  "https://github.com/NixOS/nixpkgs/archive/refs/tags/21.11.tar.gz";
+-      # Hash obtained using `nix-prefetch-url --unpack <url>`
+-      sha256 = "162dywda2dvfj1248afxc45kcrg83appjd0nmdb541hl7rnncf02";
+-  }) {};
+-  rust_channel = nixpkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain;
+-in
++{ pkgs ? (import <nixos-unstable> {}) }:
+    pkgs.mkShell {
+      buildInputs = [
+        pkgs.git
+@@ -23,9 +10,9 @@ in
+        pkgs.libiconv
+        pkgs.openssl.dev
+        pkgs.pkgconfig
+-       pkgs.python39Packages.cram
+-       pkgs.nodejs-17_x
+-     ] ++ extra_deps;
++       pkgs.python3Packages.cram
++       pkgs.nodejs
++     ];
+      RUST_BACKTRACE = 1;
+    }
+ 
+diff --git a/tester.sh b/tester.sh
+index 895b6da..c10ef7b 100755
+--- a/tester.sh
++++ b/tester.sh
+@@ -22,7 +22,7 @@ else
+     TESTS="$*"
+ fi
+ 
+-ARCH=$(arch)
++ARCH="x86_64"
+ 
+ if [ "$ARCH" = "arm64" ]; then
+     ARCH="aarch64"
+diff --git a/tests/filter/ambigous_merge.t b/tests/filter/ambigous_merge.t
+index c965db4..55a2234 100644
+--- a/tests/filter/ambigous_merge.t
++++ b/tests/filter/ambigous_merge.t
+@@ -105,7 +105,7 @@
+       |-- file2
+       `-- fileX
+   
+-  2 directories, 7 files
++  3 directories, 7 files
+ 
+   $ git log --graph --oneline --decorate master
+   *   8cbae19 (HEAD -> master) Merge branch 'hidden_branch1' into hidden_master
+diff --git a/tests/filter/cmdline.t b/tests/filter/cmdline.t
+index 8f1fb8d..9e27dea 100644
+--- a/tests/filter/cmdline.t
++++ b/tests/filter/cmdline.t
+@@ -72,7 +72,7 @@
+   |       `-- master
+   `-- tags
+   
+-  7 directories, 5 files
++  8 directories, 5 files
+ 
+   $ git read-tree HEAD josh/filter/libs/master josh/filter/libs/foo
+   $ git commit -m "sync"
+@@ -100,7 +100,7 @@
+       |-- file1
+       `-- file2
+   
+-  3 directories, 3 files
++  4 directories, 3 files
+   $ git log --graph --pretty=%s
+   * sync
+   * initial
+diff --git a/tests/filter/empty_orphan.t b/tests/filter/empty_orphan.t
+index ead1876..e879a97 100644
+--- a/tests/filter/empty_orphan.t
++++ b/tests/filter/empty_orphan.t
+@@ -67,7 +67,7 @@ Empty root commits from unrelated parts of the tree should not be included
+       |-- file2
+       `-- file3
+   
+-  1 directory, 5 files
++  2 directories, 5 files
+ 
+   $ git log master --graph --pretty=%s
+   *   Merge branch 'other'
+diff --git a/tests/filter/exclude_compose.t b/tests/filter/exclude_compose.t
+index ca48cae..0bcac50 100644
+--- a/tests/filter/exclude_compose.t
++++ b/tests/filter/exclude_compose.t
+@@ -31,7 +31,7 @@
+   `-- sub3
+       `-- file1
+   
+-  2 directories, 2 files
++  3 directories, 2 files
+   $ git log --graph --pretty=%s
+   * add file3
+   * add file1
+@@ -61,7 +61,7 @@
+   `-- sub3
+       `-- file1
+   
+-  1 directory, 1 file
++  2 directories, 1 file
+ 
+   $ josh-filter -s :exclude[sub1=:/sub3] master --update refs/josh/filtered
+   [1] :/sub1
+@@ -88,4 +88,4 @@
+   `-- sub3
+       `-- file1
+   
+-  2 directories, 2 files
++  3 directories, 2 files
+diff --git a/tests/filter/file.t b/tests/filter/file.t
+index d45f938..697fa93 100644
+--- a/tests/filter/file.t
++++ b/tests/filter/file.t
+@@ -62,5 +62,5 @@
+   |   `-- master
+   `-- tags
+   
+-  2 directories, 1 file
++  3 directories, 1 file
+ 
+diff --git a/tests/filter/hide_view.t b/tests/filter/hide_view.t
+index 436c741..e654f7f 100644
+--- a/tests/filter/hide_view.t
++++ b/tests/filter/hide_view.t
+@@ -31,7 +31,7 @@
+   `-- sub2
+       `-- file3
+   
+-  2 directories, 3 files
++  3 directories, 3 files
+ 
+   $ josh-filter -s c=:exclude[::sub1/] master --update refs/josh/filter/master
+   [1] :prefix=c
+@@ -47,7 +47,7 @@
+       `-- sub2
+           `-- file3
+   
+-  2 directories, 1 file
++  3 directories, 1 file
+ 
+   $ josh-filter -s c=:exclude[::sub1/file2] master --update refs/josh/filter/master
+   [2] :/sub1
+@@ -68,7 +68,7 @@
+       `-- sub2
+           `-- file3
+   
+-  3 directories, 2 files
++  4 directories, 2 files
+ 
+   $ josh-filter -s c=:exclude[::sub2/file3] master --update refs/josh/filter/master
+   [2] :/sub1
+@@ -90,4 +90,4 @@
+           |-- file1
+           `-- file2
+   
+-  2 directories, 2 files
++  3 directories, 2 files
+diff --git a/tests/filter/permissions/filters.t b/tests/filter/permissions/filters.t
+index b9fedc3..bfeeb98 100644
+--- a/tests/filter/permissions/filters.t
++++ b/tests/filter/permissions/filters.t
+@@ -26,7 +26,7 @@
+           |-- file_cd
+           `-- file_cd2
+   
+-  5 directories, 6 files
++  6 directories, 6 files
+ 
+   $ git diff $EMPTY_TREE HEAD
+   diff --git a/a/file_a2 b/a/file_a2
+@@ -99,7 +99,7 @@
+       |-- file_cd
+       `-- file_cd2
+   
+-  2 directories, 3 files
++  3 directories, 3 files
+ 
+   $ git diff $EMPTY_TREE HEAD
+   diff --git a/d/e/file_cd3 b/d/e/file_cd3
+@@ -144,7 +144,7 @@
+   |-- file_a2
+   `-- workspace.josh
+   
+-  0 directories, 2 files
++  1 directory, 2 files
+ 
+ 
+   $ josh-filter -s :PATHS:exclude[::c/]:prefix=x master --update refs/josh/filtered
+@@ -169,7 +169,7 @@
+       `-- b
+           `-- file_b1
+   
+-  3 directories, 3 files
++  4 directories, 3 files
+ 
+   $ git diff $EMPTY_TREE HEAD
+   diff --git a/x/a/file_a2 b/x/a/file_a2
+@@ -224,7 +224,7 @@
+           |-- file_cd
+           `-- file_cd2
+   
+-  5 directories, 6 files
++  6 directories, 6 files
+   $ cat a/file_a2
+   a/file_a2 (no-eol)
+   $ cat b/file_b1
+@@ -256,7 +256,7 @@
+           |-- file_cd
+           `-- file_cd2
+   
+-  4 directories, 5 files
++  5 directories, 5 files
+ 
+   $ git diff $EMPTY_TREE HEAD
+   diff --git a/a/file_a2 b/a/file_a2
+@@ -364,7 +364,7 @@
+   `-- b
+       `-- file_b1
+   
+-  2 directories, 4 files
++  3 directories, 4 files
+ 
+   $ git diff $EMPTY_TREE HEAD
+   diff --git a/a/file_a2 b/a/file_a2
+@@ -418,7 +418,7 @@
+   `-- b
+       `-- file_b1
+   
+-  2 directories, 4 files
++  3 directories, 4 files
+ 
+   $ git diff $EMPTY_TREE HEAD
+   diff --git a/a/file_a2 b/a/file_a2
+@@ -483,7 +483,7 @@
+       |-- file_cd
+       `-- file_cd2
+   
+-  2 directories, 3 files
++  3 directories, 3 files
+ 
+   $ git diff $EMPTY_TREE HEAD
+   diff --git a/d/e/file_cd3 b/d/e/file_cd3
+@@ -545,7 +545,7 @@
+   |-- newfile
+   `-- workspace.josh
+   
+-  3 directories, 6 files
++  4 directories, 6 files
+ 
+   $ git diff $EMPTY_TREE HEAD
+   diff --git a/cws/d/e/file_cd3 b/cws/d/e/file_cd3
+diff --git a/tests/filter/reverse_hide.t b/tests/filter/reverse_hide.t
+index dcea5ce..76b7f96 100644
+--- a/tests/filter/reverse_hide.t
++++ b/tests/filter/reverse_hide.t
+@@ -25,7 +25,7 @@
+   `-- sub1
+       `-- file1
+   
+-  1 directory, 1 file
++  2 directories, 1 file
+   $ git log --graph --pretty=%s
+   * add file1
+ 
+@@ -49,7 +49,7 @@
+   `-- sub2
+       `-- file2
+   
+-  2 directories, 3 files
++  3 directories, 3 files
+ 
+ 
+   $ cat sub1/file3
+diff --git a/tests/filter/reverse_hide_edit.t b/tests/filter/reverse_hide_edit.t
+index 0934758..a1965e5 100644
+--- a/tests/filter/reverse_hide_edit.t
++++ b/tests/filter/reverse_hide_edit.t
+@@ -25,7 +25,7 @@
+   `-- sub1
+       `-- file1
+   
+-  1 directory, 1 file
++  2 directories, 1 file
+   $ git log --graph --pretty=%s
+   * add file1
+ 
+@@ -64,5 +64,5 @@
+   `-- sub2
+       `-- file2
+   
+-  2 directories, 2 files
++  3 directories, 2 files
+ 
+diff --git a/tests/filter/reverse_hide_edit_missing_change.t b/tests/filter/reverse_hide_edit_missing_change.t
+index 0d8651b..5ba93f8 100644
+--- a/tests/filter/reverse_hide_edit_missing_change.t
++++ b/tests/filter/reverse_hide_edit_missing_change.t
+@@ -25,7 +25,7 @@
+   `-- subx
+       `-- filex
+   
+-  2 directories, 4 files
++  3 directories, 4 files
+ 
+   $ josh-filter -s :exclude[::sub2/] master --update refs/heads/hidden
+   [1] :exclude[::sub2/]
+@@ -39,7 +39,7 @@
+   `-- subx
+       `-- filex
+   
+-  1 directory, 2 files
++  2 directories, 2 files
+   $ git log --graph --pretty=%s
+   * add file1
+ 
+@@ -88,5 +88,5 @@
+   `-- subx
+       `-- filex
+   
+-  2 directories, 4 files
++  3 directories, 4 files
+ 
+diff --git a/tests/filter/reverse_merge.t b/tests/filter/reverse_merge.t
+index bcc2737..96d6f7a 100644
+--- a/tests/filter/reverse_merge.t
++++ b/tests/filter/reverse_merge.t
+@@ -35,7 +35,7 @@
+   `-- sub1
+       `-- file1
+   
+-  1 directory, 1 file
++  2 directories, 1 file
+   $ echo contents3 > sub1/file3
+   $ git add sub1/file3
+   $ git commit -m "add file3" 1> /dev/null
+@@ -52,7 +52,7 @@
+       |-- file1
+       `-- file2
+   
+-  1 directory, 2 files
++  2 directories, 2 files
+   $ echo contents4 > sub1/file4
+   $ git add sub1/file4
+   $ git commit -m "add file4" 1> /dev/null
+@@ -93,7 +93,7 @@
+   `-- sub2
+       `-- file2
+   
+-  2 directories, 5 files
++  3 directories, 5 files
+ 
+ 
+ 
+diff --git a/tests/filter/reverse_split.t b/tests/filter/reverse_split.t
+index 0b86d07..cc5b6af 100644
+--- a/tests/filter/reverse_split.t
++++ b/tests/filter/reverse_split.t
+@@ -30,7 +30,7 @@
+   `-- rest
+       `-- file2.b
+   
+-  2 directories, 2 files
++  3 directories, 2 files
+   $ git log --graph --pretty=%s
+   * add file2.b
+   * add file1.a
+@@ -82,5 +82,5 @@
+   |-- file3.a
+   `-- file4.b
+   
+-  0 directories, 4 files
++  1 directory, 4 files
+ 
+diff --git a/tests/filter/subtree_prefix.t b/tests/filter/subtree_prefix.t
+index fe97be0..72fcb19 100644
+--- a/tests/filter/subtree_prefix.t
++++ b/tests/filter/subtree_prefix.t
+@@ -29,7 +29,7 @@ Articially create a subtree merge
+   `-- subtree
+       `-- file2
+   
+-  1 directory, 2 files
++  2 directories, 2 files
+   $ git log --graph --pretty=%s
+   *   subtree merge
+   |\  
+diff --git a/tests/filter/workspace_combine_filter.t b/tests/filter/workspace_combine_filter.t
+index 635ecaf..36fec06 100644
+--- a/tests/filter/workspace_combine_filter.t
++++ b/tests/filter/workspace_combine_filter.t
+@@ -47,7 +47,7 @@
+   `-- ws2
+       `-- workspace.josh
+   
+-  6 directories, 5 files
++  7 directories, 5 files
+ 
+   $ josh-filter -s :workspace=ws
+   [1] :/sub1
+@@ -79,7 +79,7 @@
+           `-- subsub
+               `-- file2
+   
+-  4 directories, 3 files
++  5 directories, 3 files
+ 
+   $ git checkout master 2> /dev/null
+   $ josh-filter -s :workspace=ws2
+@@ -133,4 +133,4 @@
+       `-- blub
+           `-- file1
+   
+-  6 directories, 4 files
++  7 directories, 4 files
+diff --git a/tests/filter/workspace_exclude.t b/tests/filter/workspace_exclude.t
+index b190451..6c3c944 100644
+--- a/tests/filter/workspace_exclude.t
++++ b/tests/filter/workspace_exclude.t
+@@ -54,7 +54,7 @@
+   |       `-- file2
+   `-- workspace.josh
+   
+-  3 directories, 3 files
++  4 directories, 3 files
+ 
+   $ echo ws_content > fileX
+   $ echo ws_content > file1
+@@ -91,7 +91,7 @@
+       |-- fileX
+       `-- workspace.josh
+   
+-  4 directories, 6 files
++  5 directories, 6 files
+ 
+   $ cat ws/file1
+   ws_content
+diff --git a/tests/filter/workspace_implicit_filter.t b/tests/filter/workspace_implicit_filter.t
+index 31efdf1..9767e2c 100644
+--- a/tests/filter/workspace_implicit_filter.t
++++ b/tests/filter/workspace_implicit_filter.t
+@@ -50,4 +50,4 @@
+   |       `-- file2
+   `-- workspace.josh
+   
+-  3 directories, 3 files
++  4 directories, 3 files
+diff --git a/tests/filter/workspace_modify_chain.t b/tests/filter/workspace_modify_chain.t
+index 71eb7dc..89d9c7b 100644
+--- a/tests/filter/workspace_modify_chain.t
++++ b/tests/filter/workspace_modify_chain.t
+@@ -40,7 +40,7 @@
+   `-- subsub
+       `-- file2
+   
+-  1 directory, 1 file
++  2 directories, 1 file
+ 
+   $ echo ws_content > subsub/fileX
+   $ echo ws_content > subsub/file1
+@@ -69,7 +69,7 @@
+   `-- ws
+       `-- workspace.josh
+   
+-  4 directories, 6 files
++  5 directories, 6 files
+ 
+   $ cat ws/file1
+   *: No such file or directory (glob)
+diff --git a/tests/filter/workspace_multiple_globs.t b/tests/filter/workspace_multiple_globs.t
+index 4e2c96d..79f1d77 100644
+--- a/tests/filter/workspace_multiple_globs.t
++++ b/tests/filter/workspace_multiple_globs.t
+@@ -61,4 +61,4 @@
+   |       `-- file1
+   `-- workspace.josh
+   
+-  6 directories, 4 files
++  7 directories, 4 files
+diff --git a/tests/filter/workspace_shadow_file.t b/tests/filter/workspace_shadow_file.t
+index 4a26691..43a0907 100644
+--- a/tests/filter/workspace_shadow_file.t
++++ b/tests/filter/workspace_shadow_file.t
+@@ -45,7 +45,7 @@
+       |   `-- file1
+       `-- workspace.josh
+   
+-  4 directories, 4 files
++  5 directories, 4 files
+ 
+   $ cat sub1/file1
+   contents1
+@@ -68,7 +68,7 @@
+   |   `-- file1
+   `-- workspace.josh
+   
+-  3 directories, 3 files
++  4 directories, 3 files
+ 
+   $ cat c/file1
+   ws_content
+@@ -94,7 +94,7 @@
+       |-- workspace.josh
+       `-- ws_created_file
+   
+-  4 directories, 5 files
++  5 directories, 5 files
+ 
+   $ cat sub1/file1
+   ws_content
+diff --git a/tests/filter/workspace_single_file.t b/tests/filter/workspace_single_file.t
+index 4fbc616..1091a09 100644
+--- a/tests/filter/workspace_single_file.t
++++ b/tests/filter/workspace_single_file.t
+@@ -78,7 +78,7 @@
+   |       `-- file2
+   `-- workspace.josh
+   
+-  2 directories, 4 files
++  3 directories, 4 files
+ 
+   $ josh-filter -s :workspace=ws2 master --update refs/josh/master
+   [1] :/sub1
+@@ -130,4 +130,4 @@
+   |       `-- file2
+   `-- workspace.josh
+   
+-  2 directories, 4 files
++  3 directories, 4 files
+diff --git a/tests/filter/workspace_trailing_slash.t b/tests/filter/workspace_trailing_slash.t
+index 43011ff..0679bb9 100644
+--- a/tests/filter/workspace_trailing_slash.t
++++ b/tests/filter/workspace_trailing_slash.t
+@@ -72,7 +72,7 @@
+   `-- ws
+       `-- c
+   
+-  2 directories, 1 file
++  3 directories, 1 file
+ 
+   $ git checkout -q HEAD~1
+   $ tree
+@@ -86,5 +86,5 @@
+   `-- ws
+       `-- c
+   
+-  5 directories, 3 files
++  6 directories, 3 files
+ 
+diff --git a/tests/filter/workspace_unique.t b/tests/filter/workspace_unique.t
+index dd4a19d..13276bf 100644
+--- a/tests/filter/workspace_unique.t
++++ b/tests/filter/workspace_unique.t
+@@ -67,4 +67,4 @@ so the workspace.josh will still appear in the root of the workspace
+   |       `-- file2
+   `-- workspace.josh
+   
+-  3 directories, 4 files
++  4 directories, 4 files
+diff --git a/tests/proxy/setup_test_env.sh b/tests/proxy/setup_test_env.sh
+index 00b3672..d29995b 100644
+--- a/tests/proxy/setup_test_env.sh
++++ b/tests/proxy/setup_test_env.sh
+@@ -34,7 +34,7 @@ echo $! > "${TESTTMP}/server_pid"
+ 
+ # Copy static UI resources
+ mkdir -p "${TESTDIR}/../../static"
+-cp -R "${TESTDIR}/../../static/" /josh/
++cp -R "${TESTDIR}/../../static/" "${TESTTMP}/josh/"
+ 
+ if [ -n "${CARGO_TARGET_DIR+x}" ]; then
+     export TARGET_DIR=${CARGO_TARGET_DIR}
