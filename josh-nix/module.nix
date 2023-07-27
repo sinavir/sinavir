@@ -1,6 +1,6 @@
 { pkgs, lib, config, ...}:
 let
-  defaultUser = "git";
+  defaultUser = "josh-git";
   cfg = config.services.josh-proxy;
 in
 {
@@ -30,7 +30,7 @@ in
       # Even if there is no configuration file I add a settings section that will hold config options (those in ![container configuration](https://josh-project.github.io/josh/reference/container.html))
       settings = {
         remotes = lib.mkOption {
-          type = lib.types.str;
+          type = lib.types.listOf lib.types.str;
           description = "The upstream http(s) or ssh remotes. (at most one of each, else josh-proxy will fail)";
           example = [ "https://github.com" "ssh://git@github.com" ];
         };
@@ -64,8 +64,13 @@ in
           default = 300;
         };
       };
-      virtualHosts = {
+      virtualHost = {
         enable = lib.mkEnableOption "Add a nginx virtualHost configuration. Further configuration can be done through services.nginx.virtualHosts (to enable TLS for instance).";
+        host = lib.mkOption {
+          type = lib.types.str;
+          description = "vhost url";
+          default = "";
+        };
       };
     };
   };
@@ -77,15 +82,15 @@ in
       script = let options = [
         "--gc"
         "--local=$STATE_DIRECTORY"
-        "--port=${cfg.settings.httpPort}"
+        "--port=${builtins.toString cfg.settings.httpPort}"
         cfg.settings.extraOpts
       ] ++ builtins.map (remote: "--remote=${remote}") cfg.settings.remotes;
-      in "josh-proxy ${lib.concatStringsSep " " options}";
+      in "${pkgs.josh}/bin/josh-proxy ${lib.concatStringsSep " " options}";
       serviceConfig = {
         User = cfg.user;
         Group = cfg.group;
         Type = "simple";
-        DynamicUser = true;
+        StateDirectory="josh-proxy";
         Restart = "on-failure";
         ProtectHome = true;
         ProtectSystem = "strict";
@@ -105,10 +110,10 @@ in
       };
     };
     services.nginx = lib.mkIf cfg.virtualHost.enable {
-      virthualHosts.${cfg.virtualHost.host} = {
+      virtualHosts.${cfg.virtualHost.host} = {
         locations = {
           "/" = {
-            proxyPass = "http://localhost:${cfg.httpPort}";
+            proxyPass = "http://localhost:${builtins.toString cfg.settings.httpPort}";
           };
           "/repo_upgrade" = {
             return = "404";
@@ -116,10 +121,22 @@ in
           "/serve_namespace" = {
             return = "404";
           };
+          "/~/ui/" = {
+            alias = pkgs.josh.web;
+          };
         };
       };
     };
-    users.users.${cfg.user}.shell = pkgs.josh;
+    users.users = lib.mkIf (cfg.user == defaultUser) {
+      ${cfg.user} = {
+        shell = pkgs.josh;
+        isSystemUser = true;
+        group = cfg.group;
+      };
+    };
+    users.groups = lib.mkIf (cfg.group == defaultUser) {
+      ${cfg.group} = {};
+    };
     services.openssh = lib.mkIf cfg.ssh.enable {
       extraConfig = let josh-auth-key = pkgs.writeShellApplication {
         name = "josh-auth-key";

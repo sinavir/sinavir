@@ -1,42 +1,39 @@
 { lib
 , stdenv
-, buildGoModule
 , fetchFromGitHub
 , fetchNpmDeps
 , npmHooks
+, fetchpatch
 , rustPlatform
-, curl
-, git
-, graphql-client
-, killall
 , libgit2
 , nodejs
 , openssl
 , pkg-config
-, python3
-, tree
-, zlib
+, makeWrapper
+, git
+, darwin
 }:
-let
-version = "23.02.14";
 
-src = fetchFromGitHub {
-  owner = "josh-project";
-  repo = "josh";
-  rev = "4b40183c3f7d17d4d8d13279d874f69c902dfc7e"; #"r${finalAttrs.version}";
-  hash = "sha256-a1f0kZjseRoc75t1oC+RmMDp5AoCzkp7pzb1injiAGw=";
-};
-
-package = rustPlatform.buildRustPackage (rec {
+rustPlatform.buildRustPackage rec {
   pname = "josh";
+  version = "23.02.14";
+  JOSH_VERSION = "r${version}";
 
-  inherit version src;
+  src = fetchFromGitHub {
+    owner = "esrlabs";
+    repo = "josh";
+    rev = JOSH_VERSION;
+    sha256 = "1sqa8xi5d55zshky7gicac02f67vp944hclkdsmwy0bczk9hgssr";
+  };
 
-  JOSH_VERSION = version;
-
-  outputs = [ "out" "web" ];
-
-  cargoHash = "sha256-wCETfTfKs7q6ltuykanUhKlZRU//W515+2ANqhAz5X8=";
+  patches = [
+    # Unreleased patch allowing compilation from the GitHub tarball download
+    (fetchpatch {
+      name = "josh-version-without-git.patch";
+      url = "https://github.com/josh-project/josh/commit/13e7565ab029206598881391db4ddc6dface692b.patch";
+      sha256 = "1l5syqj51sn7kcqvffwl6ggn5sq8wfkpviga860agghnw5dpf7ns";
+    })
+  ];
 
   npmDeps = fetchNpmDeps {
     name = "${pname}-npm-deps";
@@ -44,63 +41,50 @@ package = rustPlatform.buildRustPackage (rec {
     sourceRoot = "source/josh-ui";
     hash = "sha256-AN4GfcPD2XwgYa/CnY/28DbPSKoCyBub4wH6/lrljmo=";
   };
-  
+
   npmRoot="josh-ui";
 
-  buildFeatures = [ "test-server" ];
+  cargoSha256 = "0f6cvz2s8qs53b2g6xja38m24hafqla61s4r5za0a1dyndgms7sl";
 
   nativeBuildInputs = [
     pkg-config
+    makeWrapper
     nodejs
     npmHooks.npmConfigHook
   ];
 
+  outputs = [ "out" "web" ];
+
   buildInputs = [
     libgit2
-    python3
     openssl
-    zlib
+  ] ++ lib.optionals stdenv.hostPlatform.isDarwin [
+    darwin.Security
   ];
 
-  TRIPLE = stdenv.hostPlatform.config;
-
-  patches = [ ./update-tests.patch ];
-  
-  checkFeatures = [ "test-server" ];
-  nativeCheckInputs = [ graphql-client killall tree python3.pkgs.cram curl git ];
-  postCheck = let
-    excludedTests = [
-      "./tests/proxy/ssh.t" # Must setup ssh inside sandbox. Not trivial
-      "./tests/proxy/no_proxy_lfs.t" # Must setup a lfs test server. The one provided by upstream doesn't buid
-      "./tests/filter/permissions/*" # Fails (I don't know why)
-    ];
-  in ''
-    # patch tests to work with our config. Using a poor man's hack
-    ln -s $TRIPLE/release ./target/debug
-
-    TESTS=$(find ./tests -name '*.t' ${lib.concatStringsSep " " (builtins.map (v: "-not -path '${v}'") excludedTests)})
-    echo "Tests to be done:"
-    echo $TESTS
-    bash run-tests.sh -v $TESTS
-    '';
-
   postInstall = ''
-    mkdir -p $web
-    mkdir -p $out/bin
     mv scripts/git-sync $out/bin
+    wrapProgram "$out/bin/josh-proxy" --prefix PATH : "${git}/bin"
+    wrapProgram "$out/bin/git-sync" --prefix PATH : "${git}/bin"
+
+    mkdir -p $web
     mv static/* $web
-    '';
+  '';
 
   passthru = {
     shellPath = "/bin/josh-ssh-shell";
   };
 
-  meta = with lib; {
+  meta = {
     description = "Just One Single History";
-    homepage = "https://github.com/josh-project/josh";
-    platforms = [ "x86_64-linux" ];
-    license = licenses.mit;
-    maintainers = with maintainers; [ ];
+    homepage = "https://josh-project.github.io/josh/";
+    downloadPage = "https://github.com/josh-project/josh";
+    changelog = "https://github.com/josh-project/josh/releases/tag/${version}";
+    license = lib.licenses.mit;
+    maintainers = [
+      lib.maintainers.sternenseemann
+      lib.maintainers.tazjin
+    ];
+    platforms = lib.platforms.all;
   };
-});
-in package
+}
