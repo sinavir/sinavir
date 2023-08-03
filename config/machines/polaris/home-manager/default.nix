@@ -44,6 +44,7 @@ in {
   home.packages = with pkgs; [
     (python3.withPackages (ps: [ps.black ps.isort ps.numpy ps.scipy ps.matplotlib]))
     ruff
+    pre-commit
     nodePackages.bash-language-server
     shellcheck
     nix-output-monitor
