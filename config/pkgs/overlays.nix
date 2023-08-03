@@ -16,4 +16,7 @@
       (import ../npins).nixos-anywhere + "/src"
     ) {};
   })
+  (self: super: {
+    josh = self.callPackage ../../josh-nix/josh.nix {};
+  })
 ]

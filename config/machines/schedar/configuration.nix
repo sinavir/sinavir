@@ -8,6 +8,7 @@
   imports =
     [
       ./knot.nix
+      ./josh.nix
       ./backups.nix
       ./networking.nix
       ./secrets
