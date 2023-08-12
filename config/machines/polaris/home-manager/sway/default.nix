@@ -18,7 +18,7 @@
       # assigns = {};
 
       fonts = {
-        names = ["monospace" "FontAwesome5Free"];
+        names = ["SauceCodePro Nerd Font"];
         size = fontsize;
       };
       focus.followMouse = "no";

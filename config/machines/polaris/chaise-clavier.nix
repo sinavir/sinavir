@@ -16,7 +16,15 @@
   };
 
   fonts.enableDefaultFonts = true;
-  fonts.fonts = [pkgs.font-awesome pkgs.helvetica-neue-lt-std pkgs.aegyptus];
+  fonts.fonts = with pkgs; [
+        (nerdfonts.override { fonts = [ "SourceCodePro" ]; })
+        fira
+        fira-code
+        libertine
+        source-serif-pro
+        stix-two
+        vistafonts
+    ];
 
   services.printing.enable = true;
   hardware.sane.enable = true;
