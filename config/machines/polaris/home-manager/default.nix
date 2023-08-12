@@ -32,6 +32,8 @@ in {
       shellAliases = {
         zat = "zathura";
         nsp = "nix-shell -p";
+        lg = "lazygit";
+        g = "git";
       };
       profileExtra = ''
         if [ -z $DISPLAY ] && [ "$(tty)" = "/dev/tty1" ]; then
