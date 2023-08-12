@@ -7,4 +7,7 @@
       ];
     };
   };
+  programs.starship = {
+    enable = true;
+  };
 }
