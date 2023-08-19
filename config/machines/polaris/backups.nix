@@ -30,7 +30,12 @@ in {
       "home" = {
         storage.ssh_command = "ssh -o 'UserKnownHostsFile ${knownHost}' -i ${config.age.secrets."bk-key".path}";
         location = {
-          source_directories = ["/mnt/btrfs-home-top-lvl/home-borgmatic-snapshot"];
+          source_directories = [
+            "/mnt/btrfs-home-top-lvl/home-borgmatic-snapshot"
+            "/etc/ssh"
+            "/etc/NetworkManager/system-connections/"
+            "/var/lib/paperless"
+          ];
           repositories = ["ssh://borg@${bkhost}/./polaris-home"];
           exclude_if_present = [".nobackup"];
         };
