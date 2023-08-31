@@ -1,0 +1,13 @@
+*.fls
+*.bbl
+*.bcf
+*.blg
+*.out
+*.fdb_latexmk
+*.aux
+/*.pdf
+*.log
+*.synctex.gz
+*.run.xml
+*.toc
+/media/deps_graph.pdf
