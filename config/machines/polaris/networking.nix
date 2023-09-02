@@ -7,5 +7,6 @@
   #systemd.services.NetworkManager-wait-online.enable = false; # ça bug
   networking.nameservers = ["1.1.1.1" "9.9.9.9"];
   services.tailscale.enable = true;
+  networking.firewall.trustedInterfaces = ["tailscale0"];
   services.resolved.enable = true;
 }
