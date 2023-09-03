@@ -18,6 +18,7 @@ in {
     ./vim.nix
     ./ssh-config.nix
     ./sway
+    ./rbw.nix
   ];
   services = {
     gpg-agent.enable = true;
