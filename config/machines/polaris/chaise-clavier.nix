@@ -4,7 +4,11 @@
   lib,
   ...
 }: {
-  security.pam.services.swaylock = {};
+  services.physlock = {
+    enable = true;
+    allowAnyUser = true;
+    lockMessage = "Screen is locked !";
+  };
   hardware.opengl.enable = true;
   hardware.bluetooth.enable = true;
 

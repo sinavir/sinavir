@@ -4,10 +4,6 @@
   lib,
   ...
 }: {
-  home.file.".config/swaylock/config".source = pkgs.substituteAll {
-    src = ./swaylockConfig;
-    photo = ./menou1.JPG;
-  };
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
@@ -97,7 +93,7 @@
         "${mod}+Shift+m" = "move scratchpad";
         "${mod}+m" = "scratchpad show";
 
-        "${mod}+i" = "exec ${pkgs.swaylock}/bin/swaylock";
+        "${mod}+i" = "exec physlock -m 'Screen is locked'";
         "${mod}+shift+i" = "exec systemctl suspend";
         "${mod}+t" = "border toggle";
         "${mod}+r" = ''mode "resize"'';

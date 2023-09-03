@@ -13,7 +13,12 @@
     echo "https://sinavir.fr/$dir/$rnd-$file"
   '';
 in {
-  imports = [./terminal.nix ./vim.nix ./ssh-config.nix ./sway/swayidle.nix ./sway];
+  imports = [
+    ./terminal.nix
+    ./vim.nix
+    ./ssh-config.nix
+    ./sway
+  ];
   services = {
     gpg-agent.enable = true;
     gpg-agent.pinentryFlavor = "tty";
