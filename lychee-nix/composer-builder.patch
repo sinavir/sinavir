@@ -1,0 +1,1274 @@
+From 27e3b694e7153ba8e5780fba6cf8f7ef447c1062 Mon Sep 17 00:00:00 2001
+From: Pol Dellaiera <pol.dellaiera@protonmail.com>
+Date: Mon, 12 Jun 2023 08:43:49 +0200
+Subject: [PATCH 1/9] composer-local-repo-plugin: init at 1.0.0
+
+---
+ .../php/composer-local-repo-plugin.nix        | 110 ++++++++++++++++++
+ pkgs/top-level/all-packages.nix               |   5 +
+ 2 files changed, 115 insertions(+)
+ create mode 100644 pkgs/build-support/php/composer-local-repo-plugin.nix
+
+diff --git a/pkgs/build-support/php/composer-local-repo-plugin.nix b/pkgs/build-support/php/composer-local-repo-plugin.nix
+new file mode 100644
+index 0000000000000..81672762618dc
+--- /dev/null
++++ b/pkgs/build-support/php/composer-local-repo-plugin.nix
+@@ -0,0 +1,110 @@
++{ stdenvNoCC, lib, fetchFromGitHub, composer, makeBinaryWrapper }:
++
++let
++  composerKeys = stdenvNoCC.mkDerivation (finalComposerKeysAttrs: {
++    pname = "composer-keys";
++    version = "fa5a62092f33e094073fbda23bbfc7188df3cbc5";
++
++    src = fetchFromGitHub {
++      owner = "composer";
++      repo = "composer.github.io";
++      rev = "${finalComposerKeysAttrs.version}";
++      hash = "sha256-3Sfn71LDG1jHwuEIU8iEnV3k6D6QTX7KVIKVaNSuCVE=";
++    };
++
++    installPhase = ''
++      runHook preInstall
++
++      mkdir -p $out
++      install releases.pub $out/keys.tags.pub
++      install snapshots.pub $out/keys.dev.pub
++
++      runHook postInstall
++    '';
++  });
++in
++stdenvNoCC.mkDerivation (finalAttrs: {
++  pname = "composer-local-repo-plugin";
++  version = "1.0.0";
++
++  src = fetchFromGitHub {
++    owner = "nix-community";
++    repo = "composer-local-repo-plugin";
++    rev = finalAttrs.version;
++    hash = "sha256-sjWV4JXK8YJ5XLASMPipKlk9u57352wIDV2PPFIP+sk=";
++  };
++
++  COMPOSER_CACHE_DIR = "/dev/null";
++  COMPOSER_MIRROR_PATH_REPOS = "1";
++  COMPOSER_HTACCESS_PROTECT = "0";
++  COMPOSER_DISABLE_NETWORK = "1";
++
++  nativeBuildInputs = [
++    makeBinaryWrapper
++  ];
++
++  buildInputs = [
++    composer
++  ];
++
++  configurePhase = ''
++    runHook preConfigure
++
++    export COMPOSER_HOME=${placeholder "out"}
++
++    runHook postConfigure
++  '';
++
++  buildPhase = ''
++    runHook preBuild
++
++    # Configure composer globally
++    composer global init --quiet --no-interaction --no-ansi \
++      --name="nixos/composer" \
++      --homepage "https://nixos.org/" \
++      --description "Composer with nix-community/composer-local-repo-plugin" \
++      --license "MIT"
++
++    composer global config --quiet minimum-stability dev
++    composer global config --quiet prefer-stable true
++    composer global config --quiet autoloader-suffix "nixPredictableAutoloaderSuffix"
++    composer global config --quiet apcu-autoloader false
++    composer global config --quiet allow-plugins.nix-community/composer-local-repo-plugin true
++    composer global config --quiet repo.packagist false
++    composer global config --quiet repo.plugin path $src
++
++    # Install the local repository plugin
++    composer global require --quiet --no-ansi --no-interaction nix-community/composer-local-repo-plugin
++
++    runHook postBuild
++  '';
++
++  checkPhase = ''
++    runHook preCheck
++
++    composer global validate --no-ansi
++    composer global show --no-ansi nix-community/composer-local-repo-plugin
++
++    runHook postCheck
++  '';
++
++  installPhase = ''
++    runHook preInstall
++
++    mkdir -p $out
++    cp -ar ${composerKeys}/* $out/
++
++    makeWrapper ${composer}/bin/composer $out/bin/composer-local-repo-plugin \
++      --prefix COMPOSER_HOME : $out
++
++    runHook postInstall
++  '';
++
++  meta = {
++    description = "Composer local repo plugin for Composer";
++    homepage = "https://github.com/nix-community/composer-local-repo-plugin";
++    license = lib.licenses.mit;
++    maintainers = with lib.maintainers; [ drupol ];
++    platforms = lib.platforms.all;
++  };
++})
+diff --git a/pkgs/top-level/all-packages.nix b/pkgs/top-level/all-packages.nix
+index 256885a8ce951..580a09e341726 100644
+--- a/pkgs/top-level/all-packages.nix
++++ b/pkgs/top-level/all-packages.nix
+@@ -17991,6 +17991,11 @@ with pkgs;
+ 
+ 
+   # PHP interpreters, packages and extensions.
++
++  composer = callPackage ../development/tools/misc/composer { };
++
++  composer-local-repo-plugin = callPackage ../build-support/php/composer-local-repo-plugin.nix {};
++
+   #
+   # Set default PHP interpreter, extensions and packages
+   php = php82;
+
+From b36ad2f51797d82ddd4479835c0edd71b3386865 Mon Sep 17 00:00:00 2001
+From: Pol Dellaiera <pol.dellaiera@protonmail.com>
+Date: Sun, 9 Apr 2023 11:53:42 +0200
+Subject: [PATCH 2/9] php: add new builder `buildComposerProject`
+
+---
+ .github/CODEOWNERS                            |   3 +-
+ .../php/build-composer-project.nix            |  61 ++++++++++
+ .../php/build-composer-repository.nix         |  79 +++++++++++++
+ pkgs/build-support/{ => php}/build-pecl.nix   |   0
+ .../php/hooks/composer-install-hook.sh        | 109 ++++++++++++++++++
+ .../php/hooks/composer-repository-hook.sh     |  66 +++++++++++
+ pkgs/build-support/php/hooks/default.nix      |  21 ++++
+ pkgs/development/interpreters/php/generic.nix |   2 +-
+ pkgs/top-level/php-packages.nix               |  11 +-
+ 9 files changed, 347 insertions(+), 5 deletions(-)
+ create mode 100644 pkgs/build-support/php/build-composer-project.nix
+ create mode 100644 pkgs/build-support/php/build-composer-repository.nix
+ rename pkgs/build-support/{ => php}/build-pecl.nix (100%)
+ create mode 100644 pkgs/build-support/php/hooks/composer-install-hook.sh
+ create mode 100644 pkgs/build-support/php/hooks/composer-repository-hook.sh
+ create mode 100644 pkgs/build-support/php/hooks/default.nix
+
+diff --git a/.github/CODEOWNERS b/.github/CODEOWNERS
+index 8bea23cd6f8e0..1c183c93e834d 100644
+--- a/.github/CODEOWNERS
++++ b/.github/CODEOWNERS
+@@ -257,7 +257,8 @@ pkgs/development/python-modules/buildcatrust/ @ajs124 @lukegb @mweinelt
+ # PHP interpreter, packages, extensions, tests and documentation
+ /doc/languages-frameworks/php.section.md          @aanderse @drupol @etu @globin @ma27 @talyz
+ /nixos/tests/php                                  @aanderse @drupol @etu @globin @ma27 @talyz
+-/pkgs/build-support/build-pecl.nix                @aanderse @drupol @etu @globin @ma27 @talyz
++/pkgs/build-support/php/build-pecl.nix            @aanderse @drupol @etu @globin @ma27 @talyz
++/pkgs/build-support/php                                     @drupol @etu
+ /pkgs/development/interpreters/php       @jtojnar @aanderse @drupol @etu @globin @ma27 @talyz
+ /pkgs/development/php-packages                    @aanderse @drupol @etu @globin @ma27 @talyz
+ /pkgs/top-level/php-packages.nix         @jtojnar @aanderse @drupol @etu @globin @ma27 @talyz
+diff --git a/pkgs/build-support/php/build-composer-project.nix b/pkgs/build-support/php/build-composer-project.nix
+new file mode 100644
+index 0000000000000..f9589ace1309c
+--- /dev/null
++++ b/pkgs/build-support/php/build-composer-project.nix
+@@ -0,0 +1,61 @@
++{ stdenvNoCC, lib, writeTextDir, php, makeBinaryWrapper, fetchFromGitHub, fetchurl, composer-local-repo-plugin }:
++
++let
++  buildComposerProjectOverride = finalAttrs: previousAttrs:
++
++    let
++      phpDrv = finalAttrs.php or php;
++      composer = finalAttrs.composer or phpDrv.packages.composer;
++      composerLock = finalAttrs.composerLock or null;
++    in
++    {
++      nativeBuildInputs = (previousAttrs.nativeBuildInputs or [ ]) ++ [
++        composer
++        composer-local-repo-plugin
++        phpDrv.composerHooks.composerInstallHook
++      ];
++
++      buildInputs = (previousAttrs.buildInputs or [ ]) ++ [
++        phpDrv
++      ];
++
++      patches = previousAttrs.patches or [ ];
++      strictDeps = previousAttrs.strictDeps or true;
++
++      # Should we keep these empty phases?
++      configurePhase = previousAttrs.configurePhase or ''
++        runHook preConfigure
++
++        runHook postConfigure
++      '';
++
++      buildPhase = previousAttrs.buildPhase or ''
++        runHook preBuild
++
++        runHook postBuild
++      '';
++
++      doCheck = previousAttrs.doCheck or true;
++      checkPhase = previousAttrs.checkPhase or ''
++        runHook preCheck
++
++        runHook postCheck
++      '';
++
++      installPhase = previousAttrs.installPhase or ''
++        runHook preInstall
++
++        runHook postInstall
++      '';
++
++      composerRepository = phpDrv.mkComposerRepository {
++        inherit composer composer-local-repo-plugin composerLock;
++        inherit (finalAttrs) patches pname src vendorHash version;
++      };
++
++      meta = previousAttrs.meta or { } // {
++        platforms = lib.platforms.all;
++      };
++    };
++in
++args: (stdenvNoCC.mkDerivation args).overrideAttrs buildComposerProjectOverride
+diff --git a/pkgs/build-support/php/build-composer-repository.nix b/pkgs/build-support/php/build-composer-repository.nix
+new file mode 100644
+index 0000000000000..7a7ba6f146c0a
+--- /dev/null
++++ b/pkgs/build-support/php/build-composer-repository.nix
+@@ -0,0 +1,79 @@
++{ stdenvNoCC, lib, writeTextDir, fetchFromGitHub, php, composer-local-repo-plugin }:
++
++let
++  mkComposerRepositoryOverride =
++    /*
++      We cannot destruct finalAttrs since the attrset below is used to construct it
++      and Nix currently does not support lazy attribute names.
++      {
++      php ? null,
++      composer ? null,
++      composerLock ? "composer.lock",
++      src,
++      vendorHash,
++      ...
++      }@finalAttrs:
++    */
++    finalAttrs: previousAttrs:
++
++    let
++      phpDrv = finalAttrs.php or php;
++      composer = finalAttrs.composer or phpDrv.packages.composer;
++    in
++    assert (lib.assertMsg (previousAttrs ? src) "mkComposerRepository expects src argument.");
++    assert (lib.assertMsg (previousAttrs ? vendorHash) "mkComposerRepository expects vendorHash argument.");
++    assert (lib.assertMsg (previousAttrs ? version) "mkComposerRepository expects version argument.");
++    assert (lib.assertMsg (previousAttrs ? pname) "mkComposerRepository expects pname argument.");
++    {
++      name = "${previousAttrs.pname}-${previousAttrs.version}-composer-repository";
++
++      # See https://github.com/NixOS/nix/issues/6660
++      dontPatchShebangs = previousAttrs.dontPatchShebangs or true;
++
++      nativeBuildInputs = (previousAttrs.nativeBuildInputs or [ ]) ++ [
++        composer
++        composer-local-repo-plugin
++        phpDrv.composerHooks.composerRepositoryHook
++      ];
++
++      buildInputs = previousAttrs.buildInputs or [ ];
++
++      strictDeps = previousAttrs.strictDeps or true;
++
++      # Should we keep these empty phases?
++      configurePhase = previousAttrs.configurePhase or ''
++        runHook preConfigure
++
++        runHook postConfigure
++      '';
++
++      buildPhase = previousAttrs.buildPhase or ''
++        runHook preBuild
++
++        runHook postBuild
++      '';
++
++      doCheck = previousAttrs.doCheck or true;
++      checkPhase = previousAttrs.checkPhase or ''
++        runHook preCheck
++
++        runHook postCheck
++      '';
++
++      installPhase = previousAttrs.installPhase or ''
++        runHook preInstall
++
++        runHook postInstall
++      '';
++
++      COMPOSER_CACHE_DIR = "/dev/null";
++      COMPOSER_MIRROR_PATH_REPOS = "1";
++      COMPOSER_HTACCESS_PROTECT = "0";
++      COMPOSER_DISABLE_NETWORK = "0";
++
++      outputHashMode = "recursive";
++      outputHashAlgo = if (finalAttrs ? vendorHash && finalAttrs.vendorHash != "") then null else "sha256";
++      outputHash = finalAttrs.vendorHash or "";
++    };
++in
++args: (stdenvNoCC.mkDerivation args).overrideAttrs mkComposerRepositoryOverride
+diff --git a/pkgs/build-support/build-pecl.nix b/pkgs/build-support/php/build-pecl.nix
+similarity index 100%
+rename from pkgs/build-support/build-pecl.nix
+rename to pkgs/build-support/php/build-pecl.nix
+diff --git a/pkgs/build-support/php/hooks/composer-install-hook.sh b/pkgs/build-support/php/hooks/composer-install-hook.sh
+new file mode 100644
+index 0000000000000..139f6357c5d79
+--- /dev/null
++++ b/pkgs/build-support/php/hooks/composer-install-hook.sh
+@@ -0,0 +1,109 @@
++declare composerHomeDir
++declare composerRepository
++declare version
++
++preConfigureHooks+=(composerInstallConfigureHook)
++preBuildHooks+=(composerInstallBuildHook)
++preCheckHooks+=(composerInstallCheckHook)
++preInstallHooks+=(composerInstallInstallHook)
++
++composerInstallConfigureHook() {
++    echo "Executing composerInstallConfigureHook"
++
++    if [[ ! -e "${composerRepository}" ]]; then
++        echo "No local composer repository found."
++        exit 1
++    fi
++
++    if [[ -e "$composerLock" ]]; then
++        cp $composerLock composer.lock
++    fi
++
++    if [[ ! -f "composer.lock" ]]; then
++        echo "No composer.lock file found, consider adding one to your repository to ensure reproducible builds."
++
++        if [[ -f "${composerRepository}/composer.lock" ]]; then
++            cp ${composerRepository}/composer.lock composer.lock
++        fi
++
++        echo "Using an autogenerated composer.lock file."
++    fi
++
++    chmod +w composer.json composer.lock
++
++    echo "Finished composerInstallConfigureHook"
++}
++
++composerInstallBuildHook() {
++    echo "Executing composerInstallBuildHook"
++
++    # Since this file cannot be generated in the composer-repository-hook.sh
++    # because the file contains hardcoded nix store paths, we generate it here.
++    composer-local-repo-plugin --no-ansi build-local-repo -p ${composerRepository} > packages.json
++
++    # Remove all the repositories of type "composer"
++    # from the composer.json file.
++    jq -r -c 'del(try .repositories[] | select(.type == "composer"))' composer.json | sponge composer.json
++
++    # Configure composer to disable packagist and avoid using the network.
++    composer config repo.packagist false
++    # Configure composer to use the local repository.
++    composer config repo.composer composer file://$PWD/packages.json
++
++    # Since the composer.json file has been modified in the previous step, the
++    # composer.lock file needs to be updated.
++    COMPOSER_DISABLE_NETWORK=1 \
++    COMPOSER_ROOT_VERSION="${version}" \
++    composer \
++      --lock \
++      --no-ansi \
++      --no-install \
++      --no-interaction \
++      --no-plugins \
++      --no-scripts \
++      update
++
++    echo "Finished composerInstallBuildHook"
++}
++
++composerInstallCheckHook() {
++    echo "Executing composerInstallCheckHook"
++
++    composer validate --no-ansi --no-interaction
++
++    echo "Finished composerInstallCheckHook"
++}
++
++composerInstallInstallHook() {
++    echo "Executing composerInstallInstallHook"
++
++    # Finally, run `composer install` to install the dependencies and generate
++    # the autoloader.
++    # The COMPOSER_ROOT_VERSION environment variable is needed only for
++    # vimeo/psalm.
++    COMPOSER_CACHE_DIR=/dev/null \
++    COMPOSER_DISABLE_NETWORK=1 \
++    COMPOSER_ROOT_VERSION="${version}" \
++    COMPOSER_MIRROR_PATH_REPOS="1" \
++    composer \
++      --no-ansi \
++      --no-interaction \
++      --no-scripts \
++      --no-plugins \
++      install
++
++    # Remove packages.json, we don't need it in the store.
++    rm packages.json
++
++    # Copy the relevant files only in the store.
++    mkdir -p $out/share/php/${pname}
++    cp -r . $out/share/php/${pname}/
++
++    # Create symlinks for the binaries.
++    jq -r -c 'try .bin[]' composer.json | while read bin; do
++        mkdir -p $out/share/php/${pname} $out/bin
++        ln -s $out/share/php/${pname}/$bin $out/bin/$(basename $bin)
++    done
++
++    echo "Finished composerInstallInstallHook"
++}
+diff --git a/pkgs/build-support/php/hooks/composer-repository-hook.sh b/pkgs/build-support/php/hooks/composer-repository-hook.sh
+new file mode 100644
+index 0000000000000..707c944522563
+--- /dev/null
++++ b/pkgs/build-support/php/hooks/composer-repository-hook.sh
+@@ -0,0 +1,66 @@
++declare composerHomeDir
++declare composerLock
++declare version
++
++preConfigureHooks+=(composerRepositoryConfigureHook)
++preBuildHooks+=(composerRepositoryBuildHook)
++preCheckHooks+=(composerRepositoryCheckHook)
++preInstallHooks+=(composerRepositoryInstallHook)
++
++composerRepositoryConfigureHook() {
++    echo "Executing composerRepositoryConfigureHook"
++
++    if [[ -e "$composerLock" ]]; then
++        cp $composerLock composer.lock
++    fi
++
++    if [[ ! -f "composer.lock" ]]; then
++        echo "No composer.lock file found, consider adding one to your repository to ensure reproducible builds."
++        composer \
++            --no-ansi \
++            --no-install \
++            --no-interaction \
++            --no-plugins \
++            --no-scripts \
++            update
++        echo "Using an autogenerated composer.lock file."
++    fi
++
++    echo "Finished composerRepositoryConfigureHook"
++}
++
++composerRepositoryBuildHook() {
++    echo "Executing composerRepositoryBuildHook"
++
++    mkdir -p repository
++
++    # Build the local composer repository
++    # The command 'build-local-repo' is provided by the Composer plugin
++    # nix-community/composer-local-repo-plugin.
++    COMPOSER_CACHE_DIR=/dev/null \
++    composer-local-repo-plugin --no-ansi build-local-repo -r repository
++
++    echo "Finished composerRepositoryBuildHook"
++}
++
++composerRepositoryCheckHook() {
++    echo "Executing composerRepositoryCheckHook"
++
++    composer validate --no-ansi --no-interaction
++
++    echo "Finished composerRepositoryCheckHook"
++}
++
++composerRepositoryInstallHook() {
++    echo "Executing composerRepositoryInstallHook"
++
++    mkdir -p $out
++
++    cp -ar repository/. $out/
++
++    # Copy the composer.lock files to the output directory, in case it has been
++    # autogenerated.
++    cp composer.lock $out/
++
++    echo "Finished composerRepositoryInstallHook"
++}
+diff --git a/pkgs/build-support/php/hooks/default.nix b/pkgs/build-support/php/hooks/default.nix
+new file mode 100644
+index 0000000000000..98198f0128795
+--- /dev/null
++++ b/pkgs/build-support/php/hooks/default.nix
+@@ -0,0 +1,21 @@
++{ makeSetupHook
++, php
++, jq
++, moreutils
++}:
++
++{
++  composerRepositoryHook = makeSetupHook
++    {
++      name = "composer-repository-hook.sh";
++      propagatedBuildInputs = [ php jq moreutils ];
++      substitutions = { };
++    } ./composer-repository-hook.sh;
++
++  composerInstallHook = makeSetupHook
++    {
++      name = "composer-install-hook.sh";
++      propagatedBuildInputs = [ php jq moreutils ];
++      substitutions = { };
++    } ./composer-install-hook.sh;
++}
+diff --git a/pkgs/development/interpreters/php/generic.nix b/pkgs/development/interpreters/php/generic.nix
+index cee1e833f9a63..38ac50081423a 100644
+--- a/pkgs/development/interpreters/php/generic.nix
++++ b/pkgs/development/interpreters/php/generic.nix
+@@ -159,7 +159,7 @@ let
+                 nixos = lib.recurseIntoAttrs nixosTests."php${lib.strings.replaceStrings [ "." ] [ "" ] (lib.versions.majorMinor php.version)}";
+                 package = tests.php;
+               };
+-              inherit (php-packages) extensions buildPecl mkExtension;
++              inherit (php-packages) extensions buildPecl mkComposerRepository buildComposerProject composerHooks mkExtension;
+               packages = php-packages.tools;
+               meta = php.meta // {
+                 outputsToInstall = [ "out" ];
+diff --git a/pkgs/top-level/php-packages.nix b/pkgs/top-level/php-packages.nix
+index 7430c98586b7b..aad260fc3c004 100644
+--- a/pkgs/top-level/php-packages.nix
++++ b/pkgs/top-level/php-packages.nix
+@@ -1,4 +1,6 @@
+ { stdenv
++, config
++, callPackages
+ , lib
+ , pkgs
+ , phpPackage
+@@ -44,12 +46,15 @@
+ }:
+ 
+ lib.makeScope pkgs.newScope (self: with self; {
+-  buildPecl = import ../build-support/build-pecl.nix {
++  buildPecl = callPackage ../build-support/php/build-pecl.nix {
+     php = php.unwrapped;
+-    inherit lib;
+-    inherit (pkgs) stdenv autoreconfHook fetchurl re2c nix-update-script;
+   };
+ 
++  composerHooks = callPackages ../build-support/php/hooks { };
++
++  mkComposerRepository = callPackage ../build-support/php/build-composer-repository.nix { };
++  buildComposerProject = callPackage ../build-support/php/build-composer-project.nix { };
++
+   # Wrap mkDerivation to prepend pname with "php-" to make names consistent
+   # with how buildPecl does it and make the file easier to overview.
+   mkDerivation = origArgs:
+
+From 248e8f3cba2982e33aae8572cf5243b5e8c94027 Mon Sep 17 00:00:00 2001
+From: Pol Dellaiera <pol.dellaiera@protonmail.com>
+Date: Fri, 14 Apr 2023 12:33:57 +0200
+Subject: [PATCH 3/9] phpPackages.composer: use `buildComposerProject` builder
+
+---
+ .../php-packages/composer/default.nix         | 31 +++++++++----------
+ 1 file changed, 15 insertions(+), 16 deletions(-)
+
+diff --git a/pkgs/development/php-packages/composer/default.nix b/pkgs/development/php-packages/composer/default.nix
+index 9cefb46d8e67e..2d0e7c579d5f2 100644
+--- a/pkgs/development/php-packages/composer/default.nix
++++ b/pkgs/development/php-packages/composer/default.nix
+@@ -1,33 +1,32 @@
+-{ mkDerivation, fetchurl, makeBinaryWrapper, unzip, lib, php }:
++{ lib, fetchFromGitHub, php, composer, unzip, _7zz, xz, git, curl, cacert, makeBinaryWrapper }:
++
++php.buildComposerProject (finalAttrs: {
++  inherit composer;
+ 
+-mkDerivation (finalAttrs: {
+   pname = "composer";
+   version = "2.6.2";
+ 
+-  src = fetchurl {
+-    url = "https://github.com/composer/composer/releases/download/${finalAttrs.version}/composer.phar";
+-    hash = "sha256-iMhNSlP88cJ9Z2Lh1da3DVfG3J0uIxT9Cdv4a/YeGu8=";
++  src = fetchFromGitHub {
++    owner = "composer";
++    repo = "composer";
++    rev = finalAttrs.version;
++    hash = "sha256-tNc0hP41aRk7MmeWXCd73uHxK9pk1tCWyjiSO568qbE=";
+   };
+ 
+-  dontUnpack = true;
+-
+   nativeBuildInputs = [ makeBinaryWrapper ];
+ 
+-  installPhase = ''
+-    runHook preInstall
+-    mkdir -p $out/bin
+-    install -D $src $out/libexec/composer/composer.phar
+-    makeWrapper ${php}/bin/php $out/bin/composer \
+-      --add-flags "$out/libexec/composer/composer.phar" \
+-      --prefix PATH : ${lib.makeBinPath [ unzip ]}
+-    runHook postInstall
++  postInstall = ''
++    wrapProgram $out/bin/composer \
++      --prefix PATH : ${lib.makeBinPath [ _7zz cacert curl git unzip xz ]}
+   '';
+ 
++  vendorHash = "sha256-V6C4LxEfXNWH/pCKATv1gf8f6/a0s/xu5j5bNJUNmnA=";
++
+   meta = {
+     changelog = "https://github.com/composer/composer/releases/tag/${finalAttrs.version}";
+     description = "Dependency Manager for PHP";
+     homepage = "https://getcomposer.org/";
+     license = lib.licenses.mit;
+-    maintainers = with lib.maintainers; [ offline ] ++ lib.teams.php.members;
++    maintainers = lib.teams.php.members;
+   };
+ })
+
+From c0c01910ce63b0490246bef8df380ea42a29cb49 Mon Sep 17 00:00:00 2001
+From: Pol Dellaiera <pol.dellaiera@protonmail.com>
+Date: Fri, 21 Apr 2023 11:53:17 +0200
+Subject: [PATCH 4/9] php: update documentation
+
+---
+ doc/languages-frameworks/php.section.md | 140 +++++++++++++++++++++++-
+ 1 file changed, 139 insertions(+), 1 deletion(-)
+
+diff --git a/doc/languages-frameworks/php.section.md b/doc/languages-frameworks/php.section.md
+index 6c4315f5c4876..2ca55aef1eff9 100644
+--- a/doc/languages-frameworks/php.section.md
++++ b/doc/languages-frameworks/php.section.md
+@@ -130,6 +130,7 @@ package: a project may depend on certain extensions and `composer`
+ won't work with that project unless those extensions are loaded.
+ 
+ Example of building `composer` with additional extensions:
++
+ ```nix
+ (php.withExtensions ({ all, enabled }:
+   enabled ++ (with all; [ imagick redis ]))
+@@ -138,7 +139,9 @@ Example of building `composer` with additional extensions:
+ 
+ ### Overriding PHP packages {#ssec-php-user-guide-overriding-packages}
+ 
+-`php-packages.nix` form a scope, allowing us to override the packages defined within. For example, to apply a patch to a `mysqlnd` extension, you can simply pass an overlay-style function to `php`’s `packageOverrides` argument:
++`php-packages.nix` form a scope, allowing us to override the packages defined
++within. For example, to apply a patch to a `mysqlnd` extension, you can simply
++pass an overlay-style function to `php`’s `packageOverrides` argument:
+ 
+ ```nix
+ php.override {
+@@ -153,3 +156,138 @@ php.override {
+   };
+ }
+ ```
++
++### Building PHP projects {#ssec-building-php-projects}
++
++With [Composer](https://getcomposer.org/), you can effectively build PHP
++projects by streamlining dependency management. As the de-facto standard
++dependency manager for PHP, Composer enables you to declare and manage the
++libraries your project relies on, ensuring a more organized and efficient
++development process.
++
++Composer is not a package manager in the same sense as `Yum` or `Apt` are. Yes,
++it deals with "packages" or libraries, but it manages them on a per-project
++basis, installing them in a directory (e.g. `vendor`) inside your project. By
++default, it does not install anything globally. This idea is not new and
++Composer is strongly inspired by node's `npm` and ruby's `bundler`.
++
++Currently, there is no other PHP tool that offers the same functionality as
++Composer. Consequently, incorporating a helper in Nix to facilitate building
++such applications is a logical choice.
++
++In a Composer project, dependencies are defined in a `composer.json` file,
++while their specific versions are locked in a `composer.lock` file. Some
++Composer-based projects opt to include this `composer.lock` file in their source
++code, while others choose not to.
++
++In Nix, there are multiple approaches to building a Composer-based project.
++
++One such method is the `php.buildComposerProject` helper function, which serves
++as a wrapper around `mkDerivation`.
++
++Using this function, you can build a PHP project that includes both a
++`composer.json` and `composer.lock` file. If the project specifies binaries
++using the `bin` attribute in `composer.json`, these binaries will be
++automatically linked and made accessible in the derivation. In this context,
++"binaries" refer to PHP scripts that are intended to be executable.
++
++To use the helper effectively, simply add the `vendorHash` attribute, which
++enables the wrapper to handle the heavy lifting.
++
++Internally, the helper operates in three stages:
++
++1. It constructs a `composerRepository` attribute derivation by creating a
++   composer repository on the filesystem containing dependencies specified in
++   `composer.json`. This process uses the function
++   `php.mkComposerRepository` which in turn uses the
++   `php.composerHooks.composerRepositoryHook` hook. Internaly this function uses
++   a custom
++   [Composer plugin](https://github.com/nix-community/composer-local-repo-plugin) to
++   generate the repository.
++2. The resulting `composerRepository` derivation is then used by the
++   `php.composerHooks.composerInstallHook` hook, which is responsible for
++   creating the final `vendor` directory.
++3. Any "binary" specified in the `composer.json` are linked and made accessible
++   in the derivation.
++
++As the autoloader optimization can be activated directly within the
++`composer.json` file, we do not enable any autoloader optimization flags.
++
++To customize the PHP version, you can specify the `php` attribute. Similarly, if
++you wish to modify the Composer version, use the `composer` attribute. It is
++important to note that both attributes should be of the `derivation` type.
++
++Here's an example of working code example using `php.buildComposerProject`:
++
++```nix
++{ php, fetchFromGitHub }:
++
++php.buildComposerProject (finalAttrs: {
++  pname = "php-app";
++  version = "1.0.0";
++
++  src = fetchFromGitHub {
++    owner = "git-owner";
++    repo = "git-repo";
++    rev = finalAttrs.version;
++    hash = "sha256-VcQRSss2dssfkJ+iUb5qT+FJ10GHiFDzySigcmuVI+8=";
++  };
++
++  # PHP version containing the `ast` extension enabled
++  php = php.buildEnv {
++    extensions = ({ enabled, all }: enabled ++ (with all; [
++      ast
++    ]));
++  };
++
++  # The composer vendor hash
++  vendorHash = "sha256-86s/F+/5cBAwBqZ2yaGRM5rTGLmou5//aLRK5SA0WiQ=";
++
++  # If the composer.lock file is missing from the repository, add it:
++  # composerLock = ./path/to/composer.lock;
++})
++```
++
++In case the file `composer.lock` is missing from the repository, it is possible
++to specify it using the `composerLock` attribute.
++
++The other method is to use all these methods and hooks individually. This has
++the advantage of building a PHP library within another derivation very easily
++when necessary.
++
++Here's a working code example to build a PHP library using `mkDerivation` and
++separate functions and hooks:
++
++```nix
++{ stdenvNoCC, fetchFromGitHub, php }:
++
++stdenvNoCC.mkDerivation (finalAttrs:
++let
++  src = fetchFromGitHub {
++    owner = "git-owner";
++    repo = "git-repo";
++    rev = finalAttrs.version;
++    hash = "sha256-VcQRSss2dssfkJ+iUb5qT+FJ10GHiFDzySigcmuVI+8=";
++  };
++in {
++  inherit src;
++  pname = "php-app";
++  version = "1.0.0";
++
++  buildInputs = [ php ];
++
++  nativeBuildInputs = [
++    php.packages.composer
++    # This hook will use the attribute `composerRepository`
++    php.composerHooks.composerInstallHook
++  ];
++
++  composerRepository = php.mkComposerRepository {
++    inherit (finalAttrs) src;
++    # Specifying a custom composer.lock since it is not present in the sources.
++    composerLock = ./composer.lock;
++    # The composer vendor hash
++    vendorHash = "sha256-86s/F+/5cBAwBqZ2yaGRM5rTGLmou5//aLRK5SA0WiQ=";
++  };
++})
++```
+
+From 9e701e63288a339b71d4d2e95222fc8be021f1ac Mon Sep 17 00:00:00 2001
+From: Elis Hirwing <elis@hirwing.se>
+Date: Wed, 9 Aug 2023 21:07:30 +0200
+Subject: [PATCH 5/9] composer-local-repo-plugin: Stop exposing this internal
+ tool
+
+---
+ pkgs/build-support/php/build-composer-project.nix    | 3 ++-
+ pkgs/build-support/php/build-composer-repository.nix | 3 ++-
+ pkgs/top-level/all-packages.nix                      | 3 ---
+ 3 files changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/pkgs/build-support/php/build-composer-project.nix b/pkgs/build-support/php/build-composer-project.nix
+index f9589ace1309c..a56720b801b86 100644
+--- a/pkgs/build-support/php/build-composer-project.nix
++++ b/pkgs/build-support/php/build-composer-project.nix
+@@ -1,4 +1,4 @@
+-{ stdenvNoCC, lib, writeTextDir, php, makeBinaryWrapper, fetchFromGitHub, fetchurl, composer-local-repo-plugin }:
++{ callPackage, stdenvNoCC, lib, writeTextDir, php, makeBinaryWrapper, fetchFromGitHub, fetchurl }:
+ 
+ let
+   buildComposerProjectOverride = finalAttrs: previousAttrs:
+@@ -6,6 +6,7 @@ let
+     let
+       phpDrv = finalAttrs.php or php;
+       composer = finalAttrs.composer or phpDrv.packages.composer;
++      composer-local-repo-plugin = callPackage ./composer-local-repo-plugin.nix { };
+       composerLock = finalAttrs.composerLock or null;
+     in
+     {
+diff --git a/pkgs/build-support/php/build-composer-repository.nix b/pkgs/build-support/php/build-composer-repository.nix
+index 7a7ba6f146c0a..95681104e2347 100644
+--- a/pkgs/build-support/php/build-composer-repository.nix
++++ b/pkgs/build-support/php/build-composer-repository.nix
+@@ -1,4 +1,4 @@
+-{ stdenvNoCC, lib, writeTextDir, fetchFromGitHub, php, composer-local-repo-plugin }:
++{ callPackage, stdenvNoCC, lib, writeTextDir, fetchFromGitHub, php }:
+ 
+ let
+   mkComposerRepositoryOverride =
+@@ -19,6 +19,7 @@ let
+     let
+       phpDrv = finalAttrs.php or php;
+       composer = finalAttrs.composer or phpDrv.packages.composer;
++      composer-local-repo-plugin = callPackage ./composer-local-repo-plugin.nix { };
+     in
+     assert (lib.assertMsg (previousAttrs ? src) "mkComposerRepository expects src argument.");
+     assert (lib.assertMsg (previousAttrs ? vendorHash) "mkComposerRepository expects vendorHash argument.");
+diff --git a/pkgs/top-level/all-packages.nix b/pkgs/top-level/all-packages.nix
+index 580a09e341726..f128c756ccab7 100644
+--- a/pkgs/top-level/all-packages.nix
++++ b/pkgs/top-level/all-packages.nix
+@@ -17991,11 +17991,8 @@ with pkgs;
+ 
+ 
+   # PHP interpreters, packages and extensions.
+-
+   composer = callPackage ../development/tools/misc/composer { };
+ 
+-  composer-local-repo-plugin = callPackage ../build-support/php/composer-local-repo-plugin.nix {};
+-
+   #
+   # Set default PHP interpreter, extensions and packages
+   php = php82;
+
+From 2160ed2bccc361c43e841e16b742cdda07f64461 Mon Sep 17 00:00:00 2001
+From: Elis Hirwing <elis@hirwing.se>
+Date: Wed, 9 Aug 2023 21:09:41 +0200
+Subject: [PATCH 6/9] composer: Stop exposing composer built from a phar file
+
+---
+ pkgs/build-support/php/composer-local-repo-plugin.nix | 4 +++-
+ pkgs/development/php-packages/composer/default.nix    | 4 ++--
+ pkgs/top-level/all-packages.nix                       | 2 --
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/pkgs/build-support/php/composer-local-repo-plugin.nix b/pkgs/build-support/php/composer-local-repo-plugin.nix
+index 81672762618dc..3e918689088db 100644
+--- a/pkgs/build-support/php/composer-local-repo-plugin.nix
++++ b/pkgs/build-support/php/composer-local-repo-plugin.nix
+@@ -1,6 +1,8 @@
+-{ stdenvNoCC, lib, fetchFromGitHub, composer, makeBinaryWrapper }:
++{ callPackage, stdenvNoCC, lib, fetchFromGitHub, makeBinaryWrapper }:
+ 
+ let
++  composer = callPackage ../../development/tools/misc/composer { };
++
+   composerKeys = stdenvNoCC.mkDerivation (finalComposerKeysAttrs: {
+     pname = "composer-keys";
+     version = "fa5a62092f33e094073fbda23bbfc7188df3cbc5";
+diff --git a/pkgs/development/php-packages/composer/default.nix b/pkgs/development/php-packages/composer/default.nix
+index 2d0e7c579d5f2..a1459bb2d253f 100644
+--- a/pkgs/development/php-packages/composer/default.nix
++++ b/pkgs/development/php-packages/composer/default.nix
+@@ -1,7 +1,7 @@
+-{ lib, fetchFromGitHub, php, composer, unzip, _7zz, xz, git, curl, cacert, makeBinaryWrapper }:
++{ lib, callPackage, fetchFromGitHub, php, unzip, _7zz, xz, git, curl, cacert, makeBinaryWrapper }:
+ 
+ php.buildComposerProject (finalAttrs: {
+-  inherit composer;
++  composer = callPackage ../../tools/misc/composer { };
+ 
+   pname = "composer";
+   version = "2.6.2";
+diff --git a/pkgs/top-level/all-packages.nix b/pkgs/top-level/all-packages.nix
+index f128c756ccab7..256885a8ce951 100644
+--- a/pkgs/top-level/all-packages.nix
++++ b/pkgs/top-level/all-packages.nix
+@@ -17991,8 +17991,6 @@ with pkgs;
+ 
+ 
+   # PHP interpreters, packages and extensions.
+-  composer = callPackage ../development/tools/misc/composer { };
+-
+   #
+   # Set default PHP interpreter, extensions and packages
+   php = php82;
+
+From 1e238b8afef29aa559b3380b240eeeb2908862ea Mon Sep 17 00:00:00 2001
+From: Elis Hirwing <elis@hirwing.se>
+Date: Wed, 9 Aug 2023 21:25:01 +0200
+Subject: [PATCH 7/9] php: Fix shellcheck string warnings in
+ composer-install-hook
+
+---
+ .../php/hooks/composer-install-hook.sh           | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/pkgs/build-support/php/hooks/composer-install-hook.sh b/pkgs/build-support/php/hooks/composer-install-hook.sh
+index 139f6357c5d79..2d5c90ea3b2fa 100644
+--- a/pkgs/build-support/php/hooks/composer-install-hook.sh
++++ b/pkgs/build-support/php/hooks/composer-install-hook.sh
+@@ -16,7 +16,7 @@ composerInstallConfigureHook() {
+     fi
+ 
+     if [[ -e "$composerLock" ]]; then
+-        cp $composerLock composer.lock
++        cp "$composerLock" composer.lock
+     fi
+ 
+     if [[ ! -f "composer.lock" ]]; then
+@@ -39,7 +39,7 @@ composerInstallBuildHook() {
+ 
+     # Since this file cannot be generated in the composer-repository-hook.sh
+     # because the file contains hardcoded nix store paths, we generate it here.
+-    composer-local-repo-plugin --no-ansi build-local-repo -p ${composerRepository} > packages.json
++    composer-local-repo-plugin --no-ansi build-local-repo -p "${composerRepository}" > packages.json
+ 
+     # Remove all the repositories of type "composer"
+     # from the composer.json file.
+@@ -48,7 +48,7 @@ composerInstallBuildHook() {
+     # Configure composer to disable packagist and avoid using the network.
+     composer config repo.packagist false
+     # Configure composer to use the local repository.
+-    composer config repo.composer composer file://$PWD/packages.json
++    composer config repo.composer composer file://"$PWD"/packages.json
+ 
+     # Since the composer.json file has been modified in the previous step, the
+     # composer.lock file needs to be updated.
+@@ -96,13 +96,13 @@ composerInstallInstallHook() {
+     rm packages.json
+ 
+     # Copy the relevant files only in the store.
+-    mkdir -p $out/share/php/${pname}
+-    cp -r . $out/share/php/${pname}/
++    mkdir -p "$out"/share/php/"${pname}"
++    cp -r . "$out"/share/php/"${pname}"/
+ 
+     # Create symlinks for the binaries.
+-    jq -r -c 'try .bin[]' composer.json | while read bin; do
+-        mkdir -p $out/share/php/${pname} $out/bin
+-        ln -s $out/share/php/${pname}/$bin $out/bin/$(basename $bin)
++    jq -r -c 'try .bin[]' composer.json | while read -r bin; do
++        mkdir -p "$out"/share/php/"${pname}" "$out"/bin
++        ln -s "$out"/share/php/"${pname}"/"$bin" "$out"/bin/"$(basename "$bin")"
+     done
+ 
+     echo "Finished composerInstallInstallHook"
+
+From f65129f006e26c738442e3bfce83f4f4dc533aad Mon Sep 17 00:00:00 2001
+From: Pol Dellaiera <pol.dellaiera@protonmail.com>
+Date: Thu, 10 Aug 2023 09:10:00 +0200
+Subject: [PATCH 8/9] builder: move internal tools in
+ `php/build-support/php/pkgs`
+
+---
+ .../php/build-composer-project.nix            |  2 +-
+ .../php/build-composer-repository.nix         |  2 +-
+ .../{ => pkgs}/composer-local-repo-plugin.nix |  2 +-
+ pkgs/build-support/php/pkgs/composer-phar.nix | 48 +++++++++++++++++++
+ .../php-packages/composer/default.nix         |  2 +-
+ 5 files changed, 52 insertions(+), 4 deletions(-)
+ rename pkgs/build-support/php/{ => pkgs}/composer-local-repo-plugin.nix (97%)
+ create mode 100644 pkgs/build-support/php/pkgs/composer-phar.nix
+
+diff --git a/pkgs/build-support/php/build-composer-project.nix b/pkgs/build-support/php/build-composer-project.nix
+index a56720b801b86..b0be330205fa3 100644
+--- a/pkgs/build-support/php/build-composer-project.nix
++++ b/pkgs/build-support/php/build-composer-project.nix
+@@ -6,7 +6,7 @@ let
+     let
+       phpDrv = finalAttrs.php or php;
+       composer = finalAttrs.composer or phpDrv.packages.composer;
+-      composer-local-repo-plugin = callPackage ./composer-local-repo-plugin.nix { };
++      composer-local-repo-plugin = callPackage ./pkgs/composer-local-repo-plugin.nix { };
+       composerLock = finalAttrs.composerLock or null;
+     in
+     {
+diff --git a/pkgs/build-support/php/build-composer-repository.nix b/pkgs/build-support/php/build-composer-repository.nix
+index 95681104e2347..86362f151f096 100644
+--- a/pkgs/build-support/php/build-composer-repository.nix
++++ b/pkgs/build-support/php/build-composer-repository.nix
+@@ -19,7 +19,7 @@ let
+     let
+       phpDrv = finalAttrs.php or php;
+       composer = finalAttrs.composer or phpDrv.packages.composer;
+-      composer-local-repo-plugin = callPackage ./composer-local-repo-plugin.nix { };
++      composer-local-repo-plugin = callPackage ./pkgs/composer-local-repo-plugin.nix { };
+     in
+     assert (lib.assertMsg (previousAttrs ? src) "mkComposerRepository expects src argument.");
+     assert (lib.assertMsg (previousAttrs ? vendorHash) "mkComposerRepository expects vendorHash argument.");
+diff --git a/pkgs/build-support/php/composer-local-repo-plugin.nix b/pkgs/build-support/php/pkgs/composer-local-repo-plugin.nix
+similarity index 97%
+rename from pkgs/build-support/php/composer-local-repo-plugin.nix
+rename to pkgs/build-support/php/pkgs/composer-local-repo-plugin.nix
+index 3e918689088db..67edbf1f44f9a 100644
+--- a/pkgs/build-support/php/composer-local-repo-plugin.nix
++++ b/pkgs/build-support/php/pkgs/composer-local-repo-plugin.nix
+@@ -1,7 +1,7 @@
+ { callPackage, stdenvNoCC, lib, fetchFromGitHub, makeBinaryWrapper }:
+ 
+ let
+-  composer = callPackage ../../development/tools/misc/composer { };
++  composer = callPackage ./composer-phar.nix { };
+ 
+   composerKeys = stdenvNoCC.mkDerivation (finalComposerKeysAttrs: {
+     pname = "composer-keys";
+diff --git a/pkgs/build-support/php/pkgs/composer-phar.nix b/pkgs/build-support/php/pkgs/composer-phar.nix
+new file mode 100644
+index 0000000000000..41cba03f4f5d6
+--- /dev/null
++++ b/pkgs/build-support/php/pkgs/composer-phar.nix
+@@ -0,0 +1,48 @@
++{
++  _7zz
++  , cacert
++  , curl
++  , fetchurl
++  , git
++  , lib
++  , makeBinaryWrapper
++  , php
++  , stdenvNoCC
++  , unzip
++  , xz
++}:
++
++stdenvNoCC.mkDerivation (finalAttrs: {
++  pname = "composer-phar";
++  version = "2.6.2";
++
++  src = fetchurl {
++    url = "https://github.com/composer/composer/releases/download/${finalAttrs.version}/composer.phar";
++    hash = "sha256-iMhNSlP88cJ9Z2Lh1da3DVfG3J0uIxT9Cdv4a/YeGu8=";
++  };
++
++  dontUnpack = true;
++
++  nativeBuildInputs = [ makeBinaryWrapper ];
++
++  installPhase = ''
++    runHook preInstall
++
++    mkdir -p $out/bin
++    install -D $src $out/libexec/composer/composer.phar
++    makeWrapper ${php}/bin/php $out/bin/composer \
++      --add-flags "$out/libexec/composer/composer.phar" \
++      --prefix PATH : ${lib.makeBinPath [ _7zz cacert curl git unzip xz ]}
++
++    runHook postInstall
++  '';
++
++  meta = {
++    changelog = "https://github.com/composer/composer/releases/tag/${finalAttrs.version}";
++    description = "Dependency Manager for PHP, shipped from the PHAR file";
++    homepage = "https://getcomposer.org/";
++    license = lib.licenses.mit;
++    maintainers = with lib.maintainers; [ drupol ];
++    platforms = lib.platforms.all;
++  };
++})
+diff --git a/pkgs/development/php-packages/composer/default.nix b/pkgs/development/php-packages/composer/default.nix
+index a1459bb2d253f..2dce4b8e93df0 100644
+--- a/pkgs/development/php-packages/composer/default.nix
++++ b/pkgs/development/php-packages/composer/default.nix
+@@ -1,7 +1,7 @@
+ { lib, callPackage, fetchFromGitHub, php, unzip, _7zz, xz, git, curl, cacert, makeBinaryWrapper }:
+ 
+ php.buildComposerProject (finalAttrs: {
+-  composer = callPackage ../../tools/misc/composer { };
++  composer = callPackage ../../../build-support/php/pkgs/composer-phar.nix { };
+ 
+   pname = "composer";
+   version = "2.6.2";
+
+From 6ea64c85554f90b68a9651ab576933a798b64afe Mon Sep 17 00:00:00 2001
+From: Pol Dellaiera <pol.dellaiera@protonmail.com>
+Date: Mon, 21 Aug 2023 12:19:17 +0200
+Subject: [PATCH 9/9] feat: add `composerNoDev`, `composerNoPlugins` and
+ `composerNoScripts` attributes
+
+---
+ pkgs/build-support/php/build-composer-project.nix  | 13 +++++++++++--
+ .../php/build-composer-repository.nix              |  7 +++++++
+ .../php/hooks/composer-install-hook.sh             | 14 +++++++++-----
+ .../php/hooks/composer-repository-hook.sh          | 11 +++++++----
+ 4 files changed, 34 insertions(+), 11 deletions(-)
+
+diff --git a/pkgs/build-support/php/build-composer-project.nix b/pkgs/build-support/php/build-composer-project.nix
+index b0be330205fa3..6aecf43457730 100644
+--- a/pkgs/build-support/php/build-composer-project.nix
++++ b/pkgs/build-support/php/build-composer-project.nix
+@@ -7,9 +7,13 @@ let
+       phpDrv = finalAttrs.php or php;
+       composer = finalAttrs.composer or phpDrv.packages.composer;
+       composer-local-repo-plugin = callPackage ./pkgs/composer-local-repo-plugin.nix { };
+-      composerLock = finalAttrs.composerLock or null;
+     in
+     {
++      composerLock = previousAttrs.composerLock or null;
++      composerNoDev = previousAttrs.composerNoDev or true;
++      composerNoPlugins = previousAttrs.composerNoPlugins or true;
++      composerNoScripts = previousAttrs.composerNoScripts or true;
++
+       nativeBuildInputs = (previousAttrs.nativeBuildInputs or [ ]) ++ [
+         composer
+         composer-local-repo-plugin
+@@ -50,8 +54,13 @@ let
+       '';
+ 
+       composerRepository = phpDrv.mkComposerRepository {
+-        inherit composer composer-local-repo-plugin composerLock;
++        inherit composer composer-local-repo-plugin;
+         inherit (finalAttrs) patches pname src vendorHash version;
++
++        composerLock = previousAttrs.composerLock or null;
++        composerNoDev = previousAttrs.composerNoDev or true;
++        composerNoPlugins = previousAttrs.composerNoPlugins or true;
++        composerNoScripts = previousAttrs.composerNoScripts or true;
+       };
+ 
+       meta = previousAttrs.meta or { } // {
+diff --git a/pkgs/build-support/php/build-composer-repository.nix b/pkgs/build-support/php/build-composer-repository.nix
+index 86362f151f096..30b0b48de7515 100644
+--- a/pkgs/build-support/php/build-composer-repository.nix
++++ b/pkgs/build-support/php/build-composer-repository.nix
+@@ -25,7 +25,14 @@ let
+     assert (lib.assertMsg (previousAttrs ? vendorHash) "mkComposerRepository expects vendorHash argument.");
+     assert (lib.assertMsg (previousAttrs ? version) "mkComposerRepository expects version argument.");
+     assert (lib.assertMsg (previousAttrs ? pname) "mkComposerRepository expects pname argument.");
++    assert (lib.assertMsg (previousAttrs ? composerNoDev) "mkComposerRepository expects composerNoDev argument.");
++    assert (lib.assertMsg (previousAttrs ? composerNoPlugins) "mkComposerRepository expects composerNoPlugins argument.");
++    assert (lib.assertMsg (previousAttrs ? composerNoScripts) "mkComposerRepository expects composerNoScripts argument.");
+     {
++      composerNoDev = previousAttrs.composerNoDev or true;
++      composerNoPlugins = previousAttrs.composerNoPlugins or true;
++      composerNoScripts = previousAttrs.composerNoScripts or true;
++
+       name = "${previousAttrs.pname}-${previousAttrs.version}-composer-repository";
+ 
+       # See https://github.com/NixOS/nix/issues/6660
+diff --git a/pkgs/build-support/php/hooks/composer-install-hook.sh b/pkgs/build-support/php/hooks/composer-install-hook.sh
+index 2d5c90ea3b2fa..9f23b90fa401d 100644
+--- a/pkgs/build-support/php/hooks/composer-install-hook.sh
++++ b/pkgs/build-support/php/hooks/composer-install-hook.sh
+@@ -1,6 +1,8 @@
+-declare composerHomeDir
+ declare composerRepository
+ declare version
++declare composerNoDev
++declare composerNoPlugins
++declare composerNoScripts
+ 
+ preConfigureHooks+=(composerInstallConfigureHook)
+ preBuildHooks+=(composerInstallBuildHook)
+@@ -59,8 +61,9 @@ composerInstallBuildHook() {
+       --no-ansi \
+       --no-install \
+       --no-interaction \
+-      --no-plugins \
+-      --no-scripts \
++      ${composerNoDev:+--no-dev} \
++      ${composerNoPlugins:+--no-plugins} \
++      ${composerNoScripts:+--no-scripts} \
+       update
+ 
+     echo "Finished composerInstallBuildHook"
+@@ -88,8 +91,9 @@ composerInstallInstallHook() {
+     composer \
+       --no-ansi \
+       --no-interaction \
+-      --no-scripts \
+-      --no-plugins \
++      ${composerNoDev:+--no-dev} \
++      ${composerNoPlugins:+--no-plugins} \
++      ${composerNoScripts:+--no-scripts} \
+       install
+ 
+     # Remove packages.json, we don't need it in the store.
+diff --git a/pkgs/build-support/php/hooks/composer-repository-hook.sh b/pkgs/build-support/php/hooks/composer-repository-hook.sh
+index 707c944522563..057acf1fcc30e 100644
+--- a/pkgs/build-support/php/hooks/composer-repository-hook.sh
++++ b/pkgs/build-support/php/hooks/composer-repository-hook.sh
+@@ -1,6 +1,8 @@
+-declare composerHomeDir
+ declare composerLock
+ declare version
++declare composerNoDev
++declare composerNoPlugins
++declare composerNoScripts
+ 
+ preConfigureHooks+=(composerRepositoryConfigureHook)
+ preBuildHooks+=(composerRepositoryBuildHook)
+@@ -20,8 +22,9 @@ composerRepositoryConfigureHook() {
+             --no-ansi \
+             --no-install \
+             --no-interaction \
+-            --no-plugins \
+-            --no-scripts \
++            ${composerNoDev:+--no-dev} \
++            ${composerNoPlugins:+--no-plugins} \
++            ${composerNoScripts:+--no-scripts} \
+             update
+         echo "Using an autogenerated composer.lock file."
+     fi
+@@ -38,7 +41,7 @@ composerRepositoryBuildHook() {
+     # The command 'build-local-repo' is provided by the Composer plugin
+     # nix-community/composer-local-repo-plugin.
+     COMPOSER_CACHE_DIR=/dev/null \
+-    composer-local-repo-plugin --no-ansi build-local-repo -r repository
++    composer-local-repo-plugin --no-ansi build-local-repo ${composerNoDev:+--no-dev} -r repository
+ 
+     echo "Finished composerRepositoryBuildHook"
+ }
