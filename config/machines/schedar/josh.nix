@@ -8,10 +8,6 @@
       enable = true;
       host = "josh.sinavir.fr";
     };
-    ssh = {
-      enable = true;
-      authorizedKeysFile = ./../../shared/pubkeys/maurice.keys;
-    };
   };
   services.nginx.virtualHosts."josh.sinavir.fr" = {
     forceSSL = true;
