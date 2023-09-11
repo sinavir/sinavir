@@ -4,7 +4,6 @@
   ...
 }: {
   imports = [
-    # TODO add backups
     ../../shared
     ./android.nix
     ./backups.nix
