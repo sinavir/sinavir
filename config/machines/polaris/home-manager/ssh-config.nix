@@ -17,6 +17,10 @@
       user = "root";
       hostname = "rigel.sinavir.fr";
     };
+    "algedi" = {
+      user = "root";
+      hostname = "algedi.sinavir.fr";
+    };
     "sas" = {
       user = "mdebray";
       hostname = "sas.eleves.ens.fr";
