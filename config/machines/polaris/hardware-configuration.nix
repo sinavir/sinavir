@@ -10,6 +10,8 @@
 }: {
   imports = [(modulesPath + "/installer/scan/not-detected.nix")];
 
+  boot.supportedFilesystems = [ "ntfs" ];
+
   boot.initrd.availableKernelModules = [
     "xhci_pci"
     "ahci"
