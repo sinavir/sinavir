@@ -11,19 +11,13 @@ in
         type = lib.types.str;
         description = ''
           User account under which josh-proxy runs.
-
-          This user will be the one you have to use
-          in order to access filtered repos via ssh
           '';
         default = defaultUser;
       };
       group = lib.mkOption {
         type = lib.types.str;
         description = ''
-          User account under which josh-proxy runs.
-
-          This user will be the one you have to use
-          in order to access filtered repos via ssh
+          Group under which josh-proxy runs.
           '';
         default = defaultUser;
       };
@@ -43,25 +37,6 @@ in
           type = lib.types.str;
           description = "Extra options passed directly to `josh-proxy` process.";
           default = "";
-        };
-      };
-      ssh = {
-        enable = lib.mkEnableOption ''
-          Add sshd config to support pulling repos in ssh.
-          (Basically it adds some extra config for the josh user)
-
-          Please keep in mind that it is STRONGLY NOT RECOMMENDED to activate
-          this option if josh instance is public
-          '';
-        sshMaxStartups = lib.mkOption {
-          type = lib.types.ints.poditive;
-          description = "Maximum number of concurrent SSH authentication attempts.";
-          default = 16;
-        };
-        sshTimeout = lib.mkOption {
-          type = lib.types.ints.positive;
-          description = "Timeout, in seconds, for a single request when serving repos over SSH. This time should cover fetch from upstream repo, filtering, and serving repo to client.";
-          default = 300;
         };
       };
       virtualHost = {
@@ -136,51 +111,6 @@ in
     };
     users.groups = lib.mkIf (cfg.group == defaultUser) {
       ${cfg.group} = {};
-    };
-    services.openssh = lib.mkIf cfg.ssh.enable {
-      extraConfig = let josh-auth-key = pkgs.writeShellApplication {
-        name = "josh-auth-key";
-        text = ''
-          KEY_TYPE=''${1}
-          KEY_FINGERPRINT=''${2}
-
-          printf "%s %s" "''${KEY_TYPE}" "''${KEY_FINGERPRINT}"
-          '';
-      };
-      in ''
-        Match User ${cfg.user}
-          LogLevel INFO
-
-          AllowStreamLocalForwarding no
-          AllowTcpForwarding no
-          AllowAgentForwarding Yes
-          PermitTunnel no
-          # Important: prevent any interactive commands from execution
-          PermitTTY no
-          PermitUserEnvironment no
-          PermitUserRC no
-          X11Forwarding no
-          PrintMotd no
-
-          # Accepted environment variables
-
-          AcceptEnv GIT_PROTOCOL
-
-          # Client management
-          ClientAliveInterval 360
-          ClientAliveCountMax 0
-
-          # Authentication
-          PasswordAuthentication no
-          HostbasedAuthentication no
-          KbdInteractiveAuthentication no
-          PermitRootLogin no
-          PubkeyAuthentication yes
-          AuthorizedKeysFile none
-
-          AuthorizedKeysCommand ${josh-auth-key}/bin/josh-auth-key %t %k
-          AuthorizedKeysCommandUser nobody
-        '';
     };
   };
 }
