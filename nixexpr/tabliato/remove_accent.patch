@@ -1,0 +1,25 @@
+diff --git a/Ressources.qrc b/Ressources.qrc
+index dd2b801..89674af 100644
+--- a/Ressources.qrc
++++ b/Ressources.qrc
+@@ -102,6 +102,6 @@
+         <file>ressources/exemples/Exemple - basique.dtb</file>
+         <file>ressources/exemples/Exemple - boutons ou notes.dtb</file>
+         <file>ressources/exemples/Exemple - anacrouse.dtb</file>
+-        <file>ressources/exemples/Polka piquée.dtb</file>
++        <file>ressources/exemples/Polka piquee.dtb</file>
+     </qresource>
+ </RCC>
+diff --git a/src/mainwindow.cpp b/src/mainwindow.cpp
+index 64d2925..645400f 100644
+--- a/src/mainwindow.cpp
++++ b/src/mainwindow.cpp
+@@ -832,7 +832,7 @@ void MainWindow::readSettings()
+         this->setWindowTitle("Tabliato - Sans titre");
+ 
+         File::mkdir(OUTPUT);
+-        open(":/examples/ressources/exemples/Polka piquée.dtb");
++        open(":/examples/ressources/exemples/Polka piquee.dtb");
+         currentOpenedFile = "";
+         terminal("Premiere utilisation de tabliato");
+     }
