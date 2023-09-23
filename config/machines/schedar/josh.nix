@@ -1,9 +1,9 @@
 { lib, pkgs, config, ... }:
 {
-  imports = [ ../../../josh-nix/module.nix ];
+  imports = [ ../../../nixexpr/josh/module.nix ];
   services.josh-proxy = {
     enable = true;
-    settings.remotes = [ "https://github.com/sinavir" ];
+    settings.remotes = [ "https://github.com/sinavir/sinavir" ];
     virtualHost = {
       enable = true;
       host = "josh.sinavir.fr";

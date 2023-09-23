@@ -1,4 +1,5 @@
 { lib
+, breakpointHook
 , stdenv
 , fetchFromGitHub
 , fetchNpmDeps
@@ -19,21 +20,14 @@ rustPlatform.buildRustPackage rec {
   version = "23.02.14";
   JOSH_VERSION = "r${version}";
 
-  src = fetchFromGitHub {
-    owner = "esrlabs";
-    repo = "josh";
-    rev = JOSH_VERSION;
-    sha256 = "1sqa8xi5d55zshky7gicac02f67vp944hclkdsmwy0bczk9hgssr";
-  };
+  src =
+    fetchFromGitHub {
+      owner = "josh-project";
+      repo = "josh";
+      rev = "d27335a668dcc64221336e49848824eae6795bc4";
+      hash = "sha256-nSlzp+I5kguLLyNsci9rNIVwmhZ3p0BgDqkJwHocW2M=";
+    };
 
-  patches = [
-    # Unreleased patch allowing compilation from the GitHub tarball download
-    (fetchpatch {
-      name = "josh-version-without-git.patch";
-      url = "https://github.com/josh-project/josh/commit/13e7565ab029206598881391db4ddc6dface692b.patch";
-      sha256 = "1l5syqj51sn7kcqvffwl6ggn5sq8wfkpviga860agghnw5dpf7ns";
-    })
-  ];
 
   npmDeps = fetchNpmDeps {
     name = "${pname}-npm-deps";
@@ -44,13 +38,14 @@ rustPlatform.buildRustPackage rec {
 
   npmRoot="josh-ui";
 
-  cargoSha256 = "0f6cvz2s8qs53b2g6xja38m24hafqla61s4r5za0a1dyndgms7sl";
+  cargoHash = "sha256-wCETfTfKs7q6ltuykanUhKlZRU//W515+2ANqhAz5X8=";
 
   nativeBuildInputs = [
     pkg-config
     makeWrapper
     nodejs
     npmHooks.npmConfigHook
+    breakpointHook
   ];
 
   outputs = [ "out" "web" ];
@@ -64,8 +59,8 @@ rustPlatform.buildRustPackage rec {
 
   postInstall = ''
     mv scripts/git-sync $out/bin
-    wrapProgram "$out/bin/josh-proxy" --prefix PATH : "${git}/bin"
-    wrapProgram "$out/bin/git-sync" --prefix PATH : "${git}/bin"
+    #wrapProgram "$out/bin/josh-proxy" --prefix PATH : "${git}/bin"
+    #wrapProgram "$out/bin/git-sync" --prefix PATH : "${git}/bin"
 
     mkdir -p $web
     mv static/* $web

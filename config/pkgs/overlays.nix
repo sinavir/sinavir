@@ -17,6 +17,6 @@
     ) {};
   })
   (self: super: {
-    josh = self.callPackage ../../josh-nix/josh.nix {};
+    josh = self.callPackage ../../nixexpr/josh/josh.nix {};
   })
 ]
