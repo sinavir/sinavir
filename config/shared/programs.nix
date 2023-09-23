@@ -10,6 +10,7 @@
     lazygit
     agenix
     jq
+    nmap
     ripgrep
     colmena
     dig
