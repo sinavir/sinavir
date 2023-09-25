@@ -58,6 +58,7 @@ in {
     nix-output-monitor
     discord
     firefox-wayland
+    lilypond
     anki
     freecad
     nix-init

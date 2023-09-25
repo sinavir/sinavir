@@ -31,6 +31,10 @@
     ];
     settings = {number = true;};
     extraConfig = ''
+      filetype off
+      set runtimepath+=${pkgs.lilypond}/share/lilypond/2.24.1/vim
+      filetype on
+      syntax on
       set termguicolors
       colorscheme base16-bright
       let g:airline_theme='base16_bright'
