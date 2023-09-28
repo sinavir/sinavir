@@ -71,5 +71,7 @@
       owner = "headscale";
       group = "headscale";
     };
+    "bk-passwd".file = ./bk-passwd.age;
+    "bk-key".file = ./bk-key.age;
   };
 }

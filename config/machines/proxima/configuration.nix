@@ -14,6 +14,7 @@
     ./knot.nix
     ./headscale.nix
     ./mail.nix
+    ./backups.nix
     ./radicale.nix
     ./networking.nix
     ./pass.nix
