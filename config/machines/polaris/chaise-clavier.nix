@@ -19,8 +19,8 @@
     keyMap = "fr";
   };
 
-  fonts.enableDefaultFonts = true;
-  fonts.fonts = with pkgs; [
+  fonts.enableDefaultPackages = true;
+  fonts.packages = with pkgs; [
         (nerdfonts.override { fonts = [ "SourceCodePro" ]; })
         fira
         fira-code
