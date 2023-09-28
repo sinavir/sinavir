@@ -30,4 +30,6 @@ in {
 
   "authelia_smtp_password.age".publicKeys = (readPubkeys "maurice") ++ (readPubkeys "proxima");
   "oidc_headscale_secret.age".publicKeys = (readPubkeys "maurice") ++ (readPubkeys "proxima");
+  "bk-passwd.age".publicKeys = (readPubkeys "proxima") ++ (readPubkeys "maurice");
+  "bk-key.age".publicKeys = (readPubkeys "proxima") ++ (readPubkeys "maurice");
 }
