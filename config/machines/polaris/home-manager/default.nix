@@ -53,6 +53,8 @@ in {
     (python3.withPackages (ps: [ps.black ps.isort ps.numpy ps.scipy ps.matplotlib]))
     ruff
     pre-commit
+    fluidsynth
+    soundfont-fluid
     nodePackages.bash-language-server
     shellcheck
     nix-output-monitor
