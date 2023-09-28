@@ -5,7 +5,7 @@
     secretKeyFile = config.age.secrets."netbox".path;
     listenAddress = "127.0.0.1";
   };
-  systemd.services.netbox.serviceConfig.TimeoutStartSec = 180;
+  systemd.services.netbox.serviceConfig.TimeoutStartSec = 600;
   services.nginx = {
     enable = true;
     virtualHosts."netbox.dgnum.sinavir.fr" = {
