@@ -10,6 +10,7 @@ in {
   "netbox.age".publicKeys =
     (readPubkeys "maurice")
     ++ (readPubkeys "schedar");
+  "kitchenowl.age".publicKeys = (readPubkeys "schedar") ++ (readPubkeys "maurice");
   "bk-passwd.age".publicKeys = (readPubkeys "schedar") ++ (readPubkeys "maurice");
   "bk-key.age".publicKeys = (readPubkeys "schedar") ++ (readPubkeys "maurice");
 }

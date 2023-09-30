@@ -18,5 +18,6 @@
     };
     "bk-passwd".file = ./bk-passwd.age;
     "bk-key".file = ./bk-key.age;
+    "kitchenowl".file = ./kitchenowl.age;
   };
 }
