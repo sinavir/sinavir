@@ -19,4 +19,5 @@
   (self: super: {
     josh = self.callPackage ../../nixexpr/josh/josh.nix {};
   })
+  (import ../../nixexpr/kitchenowl/overlay.nix)
 ]

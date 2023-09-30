@@ -11,6 +11,7 @@
       ./josh.nix
       ./backups.nix
       ./networking.nix
+      ./kitchenowl.nix
       ./secrets
       ../../shared
       ./hardware-configuration.nix
