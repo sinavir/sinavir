@@ -1,0 +1,18 @@
+digraph {
+subgraph cluster_drv {
+"compiler.drv" -> "prgm.drv"
+"lib.drv"      -> "prgm.drv"
+}
+
+"source-code"  -> "prgm.drv"
+
+subgraph cluster_out {
+"compiler.out"
+"lib.out"      -> "prgm.out"
+}
+
+"compiler.drv" -> "compiler.out" [style="dashed"]
+"prgm.drv" -> "prgm.out" [style="dashed"]
+"lib.drv" -> "lib.out" [style="dashed"]
+
+}
