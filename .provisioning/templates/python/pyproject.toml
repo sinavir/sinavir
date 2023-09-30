@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name =  "name"
+authors = [
+    {name = "Maurice Debray", email = "sinavir@sinavir.fr"},
+]
+description = ""
+version="0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+]
+
+# [project.scripts]
+# sample = "sample:main"
+
+# If there are data files included in your packages that need to be
+# installed, specify them here.
+
+# [tool.setuptools]
+# package-data = {"sample" = ["*.dat"]}
+
+[tool.ruff]
+select = ["ALL"]
