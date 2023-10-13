@@ -28,6 +28,15 @@
           sha256 = "sha256-FlgguTfMbhh4q1f+eVnb+Q9OmlSM+w148ZJp4t6zdYo=";
         };
       })
+      (pkgs.vimUtils.buildVimPluginFrom2Nix {
+        name = "typst.vim";
+        src = pkgs.fetchFromGitHub {
+          owner = "kaarmu";
+          repo = "typst.vim";
+          rev = "8101539d6b1e4a9ae071f26ac7602cd3866ec4de";
+          hash = "sha256-n8BbC5i6hzy/yg5aD2UvsKVgZzx2K7HHEGC16NbdGOg=";
+        };
+      })
     ];
     settings = {number = true;};
     extraConfig = ''
@@ -58,6 +67,10 @@
       \   ],
       \   'rust': [
       \       'rustfmt',
+      \       'trim_whitespace',
+      \       'remove_trailing_lines',
+      \   ] ,
+      \   'typst': [
       \       'trim_whitespace',
       \       'remove_trailing_lines',
       \   ] ,
