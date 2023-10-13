@@ -49,7 +49,7 @@ format = " $icon {$signal_strength $ssid|Wired}  {$ip|NoV4}/{$ipv6|NoV6} d:$spee
 
 [[block]]
 block = "backlight"
-invert_icons = true
+invert_icons = false
 
 [[block]]
 block = "battery"
