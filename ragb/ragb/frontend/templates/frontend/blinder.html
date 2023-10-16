@@ -1,0 +1,66 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block content %}
+
+<section class="section content container is-max-desktop">
+  <h1 class="title is-3">{{ object.name }}</h1>
+  <svg viewBox="-3.5 -3.5 112 112" version="1.1" id="blinder" >
+    <style>
+      circle {
+        fill: white;
+        stroke: black;
+        stroke-width: 2;
+      }
+{% if perms.backend.restricted_change_light %}
+      circle:hover {
+        stroke: grey;
+      }
+{% endif %}
+      {% for light in lights %}
+      #light{{ light.obj.id }} {
+        fill: {{ light.obj.get_html_color }};
+      }
+      {% endfor %}
+    </style>
+    <g id="layer1">
+      <rect style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none" width="110" height="110" x="-2.5" y="-2.5" rx="15" />
+      {% for light in lights %}
+      <circle id="light{{ light.obj.id }}" r="10" cx="{{ light.position_x }}" cy="{{ light.position_y }}" data-target="modal-light{{ light.obj.id }}" class="js-modal-trigger"/>
+      {% endfor %}
+    </g>
+  </svg>
+</section>
+{% if perms.backend.restricted_change_light %}
+{% for light in lights %}
+<div class="modal" id="modal-light{{ light.obj.id }}">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Couleur du pixel n°{{light.id}}</p>
+      <button class="delete" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body">
+      <div class="field is-grouped">
+        {% csrf_token %}
+        <div class="control">
+          <input id="input-light{{light.obj.id}}" class="input" type="color" name="light{{light.obj.id}}" value="{{ light.obj.get_html_color }}">
+        </div>
+        <div class="control">
+          <button class="save-color button is-info" data-target="{{light.obj.id}}" data-url="{% url "backend:light-detail" light.obj.id %}">Enregistrer</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+<div class="modal" id="modal-loading">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+      <progress class="progress is-small is-primary" max="100">15%</progress>
+  </div>
+</div>
+<script>const WEBSOCKET_ENDPOINT = "{{ websocket_endpoint }}";</script>
+<script src="{% static "js/bulma-toast.min.js" %}" defer></script>
+<script src="{% static "js/update-color.js" %}" defer></script>
+{% endblock %}

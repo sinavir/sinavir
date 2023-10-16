@@ -7731,6 +7731,9 @@ a.has-text-danger-dark:hover, a.has-text-danger-dark:focus {
 .tr-disabled {
   opacity: 0.33; }
 
+.input[type=color] {
+  min-width: 100px; }
+
 .divider {
   position: relative;
   display: flex;

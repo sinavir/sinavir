@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,15 +23,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-elz+_!5$ad6r%%_aia_8pdzdrd(i=d_krcd@gv1t11wolz@bv^"
 
+SECRET_KEY_FILE = os.environ.get("SECRET_KEY_FILE", "")
+if SECRET_KEY_FILE != "":
+    try:
+        with open(SECRET_KEY_FILE, encoding="utf-8") as f:
+            SECRET_KEY = f.read()
+    except:
+        logging.warning(f"Not able to open SECRET_KEY_FILE: {SECRET_KEY_FILE}")
+
 # Custom settings
 
-REDIS_URI = f"unix://{BASE_DIR / '../redis-tmp/redis.sock'}?db=0"
-WEBSOCKETS_PORT = 8888
+REDIS_URI = os.environ.get(
+    "REDIS_URI", f"unix://{BASE_DIR / '../redis-tmp/redis.sock'}?db=0"
+)
+WEBSOCKET_PORT = int(os.environ.get("WEBSOCKET_PORT", "8888"))
+WEBSOCKET_HOST = os.environ.get("WEBSOCKET_HOST", "localhost")
+WEBSOCKET_ENDPOINT = os.environ.get(
+        "WEBSOCKET_ENDPOINT", f"ws://{WEBSOCKET_HOST}:{WEBSOCKET_PORT}"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get(f"DEBUG", "1") != "0"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get(f"ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -105,8 +120,8 @@ from django.urls import reverse_lazy
 
 LOGIN_URL = reverse_lazy("authens:login")
 
-# LOGIN_REDIRECT_URL = reverse_lazy("frontend:budget")
-# LOGOUT_REDIRECT_URL = reverse_lazy("frontend:budget")
+LOGIN_REDIRECT_URL = reverse_lazy("frontend:home")
+LOGOUT_REDIRECT_URL = reverse_lazy("frontend:home")
 
 # Django-rest-framework
 # https://www.django-rest-framework.org/
@@ -122,11 +137,16 @@ REST_FRAMEWORK = {
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("DB_NAME", BASE_DIR / "db.sqlite3"),
+        "USER": os.environ.get("DB_USER", ""),
+        "PASSWORD": os.environ.get("DB_PASS", ""),
+        "HOST": os.environ.get("DB_HOST", ""),
+        "PORT": os.environ.get("DB_PORT", ""),
+    },
 }
 
 CACHES = {
@@ -176,6 +196,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+
+STATIC_ROOT = os.environ.get("STATIC_ROOT", "static/")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

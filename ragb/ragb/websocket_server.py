@@ -36,7 +36,9 @@ async def process_events():
 
 
 async def main():
-    async with websockets.serve(handler, "localhost", settings.WEBSOCKETS_PORT):
+    async with websockets.serve(
+        handler, settings.WEBSOCKET_HOST, settings.WEBSOCKET_PORT
+    ):
         await process_events()  # runs forever
 
 

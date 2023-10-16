@@ -1,0 +1,30 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block content %}
+
+<section class="section content container is-max-desktop">
+  <h1 class="title is-3">{{ object.name }}</h1>
+      {% if perms.backend.restricted_change_light %}
+      <div class="field is-grouped">
+        {% csrf_token %}
+        <div class="control">
+          <input id="input-light{{light.obj.id}}" class="input" type="color" name="light{{light.obj.id}}" value="{{ light.obj.get_html_color }}">
+        </div>
+        <div class="control">
+          <button class="save-color button is-info" data-target="{{light.obj.id}}" data-url="{% url "backend:light-detail" light.obj.id %}">Enregistrer</button>
+        </div>
+      </div>
+      {% endif %}
+</section>
+<script defer>
+</script>
+<div class="modal" id="modal-loading">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+      <progress class="progress is-small is-primary" max="100">15%</progress>
+  </div>
+</div>
+<script>const WEBSOCKET_ENDPOINT = "{{ websocket_endpoint }}";</script>
+<script src="{% static "js/bulma-toast.min.js" %}" defer></script>
+<script src="{% static "js/update-color.js" %}" defer></script>
+{% endblock %}
