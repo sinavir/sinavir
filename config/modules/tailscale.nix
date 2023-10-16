@@ -17,4 +17,7 @@
       };
     };
   networking.firewall.trustedInterfaces = ["tailscale0"];
+  systemd.network.wait-online.ignoredInterfaces = [ 
+    config.services.tailscale.interfaceName
+  ];
 }
