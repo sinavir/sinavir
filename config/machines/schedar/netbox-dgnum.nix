@@ -15,6 +15,11 @@
       locations."/static/".alias = "${config.services.netbox.dataDir}/static/";
     };
   };
+  services.redis.servers.netbox.settings = {
+    enable-protected-configs = true;
+    enable-debug-command = true;
+    enable-module-command = true;
+  };
   users.users.nginx.extraGroups = ["netbox"];
   networking.firewall.allowedTCPPorts = [ 443 80 ];
 }
