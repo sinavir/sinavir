@@ -1,0 +1,81 @@
+@charset "utf-8"
+
+// MIT License
+// 
+// Copyright (c) 2020 CreativeBulma
+// 
+// (https://github.com/CreativeBulma/bulma-divider/)
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+$divider-background-color: $border !default
+$divider-font-size: $size-7 !default
+$divider-margin-inner-size: 10px !default
+$divider-margin-size: 25px !default
+
+.divider
+    position: relative
+    display: flex
+    align-items: center
+    text-transform: uppercase
+    color: $grey
+    font-size: $divider-font-size
+    font-weight: $weight-semibold
+    letter-spacing: .5px
+    margin: $divider-margin-size 0
+
+    &::after,
+    &::before
+        content: ''
+        display: block
+        flex: 1
+        height: 1px
+        background-color: $divider-background-color
+
+    &.is-vertical
+        flex-direction: column
+        margin: 0 $divider-margin-size
+
+        &::after,
+        &::before
+            height: auto
+            width: 1px
+
+        &::after
+            margin-left: 0
+            margin-top: $divider-margin-inner-size
+
+        &::before
+            margin-right: 0
+            margin-bottom: $divider-margin-inner-size
+
+    @each $name, $pair in $colors
+        $color: nth($pair, 1)
+        &.is-#{$name}
+            &::after,
+            &::before
+                background-color: $color
+
+            // If light and dark colors are provided
+            @if length($pair) >= 4
+                $color-light: nth($pair, 3)
+                &.is-light
+                    &::after,
+                    &::before
+                        background-color: $color-light

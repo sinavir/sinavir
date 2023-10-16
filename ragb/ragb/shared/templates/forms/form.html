@@ -1,0 +1,18 @@
+{% if errors %}
+{% if form.non_field_errors %}
+<div class="notification is-danger px-3 has-text-centered">
+  {% for non_field_error in form.non_field_errors %}
+  {{ non_field_error }}
+  {% if not forloop.last %}<hr>{% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+{% endif %}
+
+{% for field in form.hidden_fields %}
+{{ field }}
+{% endfor %}
+
+{% for field in form.visible_fields %}
+{% include 'forms/field.html' %}
+{% endfor %}

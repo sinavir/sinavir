@@ -1,0 +1,14 @@
+{% if formset.non_form_errors %}
+<div class="message is-danger">
+  <p class="message-body">
+    {% for error in formset.non_form_errors %}
+    {{ error }}<br>
+    {% endfor %}
+  </p>
+</div>
+{% endif %}
+
+{{ formset.management_form }}
+{% for form in formset %}
+{% include 'forms/form.html' %}
+{% endfor %}

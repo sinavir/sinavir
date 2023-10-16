@@ -1,0 +1,33 @@
+{% load bulma %}
+
+<div class="field">
+  {% if field|is_checkbox %}
+
+  {% include "forms/checkbox.html" %}
+
+  {% elif field|is_radio %}
+
+  {% include "forms/radio.html" %}
+
+  {% elif field|is_input %}
+
+  {% include "forms/input.html" %}
+
+  {% elif field|is_textarea %}
+
+  {% include "forms/textarea.html" %}
+
+  {% elif field|is_select %}
+
+  {% include "forms/select.html" %}
+
+  {% elif field|is_file %}
+
+  {% include "forms/file.html" %}
+
+  {% else %}
+
+  {% include "forms/other.html" %}
+
+  {% endif %}
+</div>

@@ -1,0 +1,35 @@
+{% load i18n %}
+
+<div class="modal" id="modal-{{ modal_id }}">
+  <div class="modal-background" data-closes="modal-{{ modal_id }}"></div>
+  <div class="modal-card">
+
+    <header class="modal-card-head">
+      <p class="modal-card-title">{{ modal_title }}</p>
+      <button class="delete" aria-label="close" data-closes="modal-{{ modal_id }}"></button>
+    </header>
+
+    <section class="modal-card-body">
+      <form method="post" action="{{ post_url }}" id="form-{{ modal_id }}" data-modal="modal-{{ modal_id }}">
+        {% csrf_token %}
+        {% include "forms/form.html" %}
+      </form>
+    </section>
+
+    <footer class="modal-card-foot">
+      <button class="button is-fullwidth is-outlined is-primary is-light" form="form-{{ modal_id }}" type="submit">
+        <span class="icon">
+          <i class="fas fa-check"></i>
+        </span>
+        <span>{% trans "Enregistrer" %}</span>
+      </button>
+
+      <button class="button is-primary button-close" data-closes="modal-{{ modal_id }}">
+        <span class="icon">
+          <i class="fas fa-times"></i>
+        </span>
+        <span>{% trans "Annuler" %}</span>
+      </button>
+    </footer>
+  </div>
+</div>
