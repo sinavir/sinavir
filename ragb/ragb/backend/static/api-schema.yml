@@ -1,0 +1,153 @@
+openapi: 3.0.2
+info:
+  title: 'R/AGB'
+  version: '1.0.0'
+  description: 'API to control AGB projectors. A Light object corresponds to a light source in a projector (which can have several light sources). Lights name attribute should clearly identify which projector this Light belongs to.<br><br>Vocabulary:<br> - Blinder: Projector with 16 lights in a 4x4 square.<br> - Par LED: Single colour spotlight<br> - LED tube: bar of 48 independently controllable lights'
+paths:
+  /api/ratelimits/:
+    get:
+      operationId: retrieveRateLimits
+      description: 'To get the ratelimits (in req/msec). People are rate limited on a per-user basis and on a per-light basis'
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimits'
+          description: ''
+      tags:
+      - api
+  /api/light/:
+    get:
+      operationId: listLights
+      description: 'List all individual lights'
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LightRestricted'
+          description: ''
+      tags:
+      - api
+  /api/light/{id}/:
+    get:
+      operationId: retrieveLight
+      description: ''
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this light.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LightRestricted'
+          description: ''
+      tags:
+      - api
+    put:
+      operationId: updateLight
+      description: ''
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this light.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LightRestricted'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LightRestricted'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LightRestricted'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LightRestricted'
+          description: ''
+      tags:
+      - api
+    patch:
+      operationId: partialUpdateLight
+      description: ''
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this light.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LightRestricted'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LightRestricted'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LightRestricted'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LightRestricted'
+          description: ''
+      tags:
+      - api
+components:
+  schemas:
+    RateLimits:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user_ratelimit:
+          type: integer
+        light_ratelimit:
+          type: integer
+    LightRestricted:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        last_update:
+          type: string
+          format: date-time
+          readOnly: true
+        red:
+          type: integer
+          maximum: 255
+        green:
+          type: integer
+          maximum: 255
+        blue:
+          type: integer
+          maximum: 255
+        html_color:
+          type: string
+          readOnly: true

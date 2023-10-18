@@ -6,6 +6,7 @@ let
       authens = self.callPackage ./authens.nix { };
       pythoncas = self.callPackage ./python-cas.nix { };
       django-solo = self.callPackage ./django-solo.nix { };
+      pyjecteur = self.callPackage ../../pyjecteur/pyjecteur.nix { };
     };
   };
 in
@@ -14,15 +15,19 @@ python.withPackages (ps: [
   ps.gunicorn
   ps.djangorestframework
   ps.authens
+  ps.requests
+  ps.pyjecteur
   ps.python-dotenv
   ps.websockets
   ps.pyyaml
   ps.uritemplate
+  ps.colour
   ps.django-solo
   ps.django-redis
   ps.aioredis
-] ++ lib.optionals debug [
+  ps.psycopg
   ps.django-debug-toolbar
+] ++ lib.optionals debug [
   ps.black
   ps.isort
 ])

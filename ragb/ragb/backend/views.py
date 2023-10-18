@@ -14,7 +14,7 @@ class LightViewSet(viewsets.ModelViewSet):
     permission_classes = [LightPermissions]
 
     def get_serializer_class(self):
-        if self.request.method == "POST":
+        if self.request and self.request.method == "POST":
             return self.serializer_class_create
         return super().get_serializer_class()
 

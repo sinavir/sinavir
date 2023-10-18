@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import logging
 import os
 from pathlib import Path
 
@@ -31,6 +32,16 @@ if SECRET_KEY_FILE != "":
     except:
         logging.warning(f"Not able to open SECRET_KEY_FILE: {SECRET_KEY_FILE}")
 
+DEV_KEY = "coucou"
+
+DEV_KEY_FILE = os.environ.get("DEV_KEY_FILE", "")
+if DEV_KEY_FILE != "":
+    try:
+        with open(DEV_KEY_FILE, encoding="utf-8") as f:
+            DEV_KEY = f.read()
+    except:
+        logging.warning(f"Not able to open DEV_KEY_FILE: {DEV_KEY_FILE}")
+
 # Custom settings
 
 REDIS_URI = os.environ.get(
@@ -39,13 +50,16 @@ REDIS_URI = os.environ.get(
 WEBSOCKET_PORT = int(os.environ.get("WEBSOCKET_PORT", "8888"))
 WEBSOCKET_HOST = os.environ.get("WEBSOCKET_HOST", "localhost")
 WEBSOCKET_ENDPOINT = os.environ.get(
-        "WEBSOCKET_ENDPOINT", f"ws://{WEBSOCKET_HOST}:{WEBSOCKET_PORT}"
+    "WEBSOCKET_ENDPOINT", f"ws://{WEBSOCKET_HOST}:{WEBSOCKET_PORT}"
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get(f"DEBUG", "1") != "0"
+DEBUG = os.environ.get("DEBUG", "1") != "0"
 
-ALLOWED_HOSTS = os.environ.get(f"ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+ENABLE_DJDT = os.environ.get("ENABLE_DJDT", "1") != "0"
+
+
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -78,7 +92,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-if DEBUG:
+if ENABLE_DJDT:
     INSTALLED_APPS += [
         "debug_toolbar",
     ]
@@ -122,6 +136,15 @@ LOGIN_URL = reverse_lazy("authens:login")
 
 LOGIN_REDIRECT_URL = reverse_lazy("frontend:home")
 LOGOUT_REDIRECT_URL = reverse_lazy("frontend:home")
+
+# DJDT
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    # Toolbar options
+    "PROFILER_MAX_DEPTH": 20,
+    "SHOW_TOOLBAR_CALLBACK": "ragb.utils.show_debug_toolbar",
+}
 
 # Django-rest-framework
 # https://www.django-rest-framework.org/
@@ -191,6 +214,24 @@ USE_I18N = True
 
 USE_TZ = True
 
+# logging
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "propagate": True,
+        },
+    },
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/

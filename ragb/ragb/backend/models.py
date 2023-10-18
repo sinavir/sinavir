@@ -30,7 +30,10 @@ class Light(models.Model):
         return self.name
 
     class Meta:
-        permissions = [("restricted_change_light", "Change light value")]
+        permissions = [
+            ("restricted_change_light", "Change light value"),
+            # ("change_all_light", "Change all lights in one request"),
+        ]
 
 
 class Fixture(models.Model):

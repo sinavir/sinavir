@@ -27,5 +27,5 @@ urlpatterns = [
     path("", include("frontend.urls")),
 ]
 
-if settings.DEBUG:
+if settings.ENABLE_DJDT:
     urlpatterns += [path("__debug__/", include("debug_toolbar.urls"))]

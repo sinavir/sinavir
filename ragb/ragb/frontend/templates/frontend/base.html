@@ -71,6 +71,12 @@
           {{ m }}
         </div>
       {% endfor %}
+      {% if not user.is_authenticated %}
+      <div class="notification is-warning" id="message-connect-to-edit">
+        <button class="delete" data-target="message-connect-to-edit"></button>
+        Connectez-vous pour éditer les couleurs
+      </div>
+      {% endif %}
     </section>
     {% block content %}{% endblock %}
     <script src="{% static "js/bulma-utils.js" %}" defer></script>

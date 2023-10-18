@@ -19,13 +19,6 @@ urlpatterns = [
         ),
         name="swagger-ui",
     ),
-    path(
-        "openapi",
-        get_schema_view(
-            title="R/AGB", description="API for all things", version="1.0.0"
-        ),
-        name="openapi-schema",
-    ),
 ]
 router = routers.DefaultRouter()
 

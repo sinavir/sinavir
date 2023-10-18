@@ -23,7 +23,7 @@ class HomeView(TemplateView):
         fixtures = {
             "blinder": {
                 "id": blinder.id,
-                "lights": blinder.light_set.all(),
+                "lights": blinder.light_set.order_by("id"),
             },
             "par_led_front_left": {
                 "id": par_led[0].id,

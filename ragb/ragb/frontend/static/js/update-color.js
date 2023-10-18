@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
           'Accept': "application/json",
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({"id": lightId, "red": color.r, "green": color.g, "blue": color.b}),
+        body: JSON.stringify({"red": color.r, "green": color.g, "blue": color.b}),
       }).then((resp) => {
         if(!resp.ok) {
           alert(`Request failed. Err code:${resp.status}`);
