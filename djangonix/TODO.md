@@ -1,0 +1,3 @@
+- Static root path (use static_url ?)
+- Add env loading framework
+- Package everything
