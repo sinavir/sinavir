@@ -1,8 +1,7 @@
 """
 Module providing class for handling fixtures and generating the appropriate DMX.
 """
-# pyright: reportUnnecessaryTypeIgnoreComment=true
-# import logging
+from copy import deepcopy
 from typing import Any, Callable, Optional, Union
 
 from .reactive import BaseReactiveValue, ReactiveMixin
@@ -52,10 +51,17 @@ class AbstractLight:
 
     def __init__(self):
         self._universe: Optional[Universe] = None
+        # The dmx values
         self._dmx: bytes = bytearray(self.address_size)
+        # dmx memory_view to change in O(1) the values
         self._dmx_mv = memoryview(self._dmx)
 
+        # Dict holdin conversion functions for attr values to dmx:
+        #  { attr_name => (address, length, converter function) }
         self._attrs_to_dmx: dict[str, tuple[int, int, Callable[[Any], bytes]]] = {}
+
+        # List holding conversion functions from dmx bytes to attrs.
+        #  [ ( "attr_name", dmx_addr, length, converter function ) ]
         self._dmx_to_attrs: list[
             Optional[tuple[str, int, int, Callable[[bytes], Any]]]
         ] = [None for _ in range(self.address_size)]
@@ -66,23 +72,21 @@ class AbstractLight:
         def on_modified_factory(key):
             return lambda value: self.attr_set_hook(key, value)
 
-        for key, value in self.__class__.__dict__.items():
-            # TODO: rename value to something more explicit (RValue ?)
-            if isinstance(value, BaseReactiveValue):
-                val = value.value
+        for key, rValueObject in self.__class__.__dict__.items():
+            if isinstance(rValueObject, BaseReactiveValue):
+                val = deepcopy(rValueObject.value)
                 if isinstance(val, ReactiveMixin):
                     val.on_modified_hook = on_modified_factory(key)
-                self._attrs_to_dmx[key] = value.attr_to_dmx()
+                self._attrs_to_dmx[key] = rValueObject.attr_to_dmx()
 
-                for i, length, clbk in value.dmx_to_attr():
+                for i, length, callback in rValueObject.dmx_to_attr():
                     for k in range(i, i + length):
-                        self._dmx_to_attrs[k] = (key, i, length, clbk)
+                        self._dmx_to_attrs[k] = (key, i, length, callback)
         self._enable_auto_update: bool = True
         # Finally set the attributes to their value
-        for key, value in self.__class__.__dict__.items():
-            # TODO: rename value to something more explicit (RValue ?)
-            if isinstance(value, BaseReactiveValue):
-                val = value.value
+        for key, rValueObject in self.__class__.__dict__.items():
+            if isinstance(rValueObject, BaseReactiveValue):
+                val = rValueObject.value
                 setattr(self, key, val)
 
     def register_universe(self, universe: "Universe") -> None:

@@ -84,12 +84,13 @@ class RBool(BaseReactiveValue):
         )
 
 
-class ReactiveMixin:  # pylint: disable=too-few-public-methods
+class ReactiveMixin:
     """
     Mixin for data types that need to update
     """
 
-    on_modified_hook: Callable[[Any], None] = lambda value: None
+    def on_modified_hook(value):
+        return None
 
 
 class L(ReactiveMixin):  # pylint: disable=invalid-name
@@ -130,6 +131,13 @@ class RList(BaseReactiveValue):
         from_byte: Callable[[bytes], Any] = from_bytes,
         to_byte: Callable[[Any], bytes] = to_bytes,
     ):
+        """
+        value: L([]) object
+        address: DMX address
+        unit_size: size of one value in the list (number of DMX slots it takes)
+        from_bytes, to_byte: convert function from list value to dmx bytes
+                             (and reciprocally)
+        """
         self.value = value
         self.address: int = address
         self.unit_size = unit_size
@@ -139,6 +147,10 @@ class RList(BaseReactiveValue):
 
     def dmx_to_attr(self):
         def parser_factory(i):
+            """
+            Factory to create functions that updates i-th value of list
+            """
+
             def parser(bytes_val):
                 self.value[i] = self.from_byte(bytes_val)
                 return self.value
