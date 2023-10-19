@@ -38,7 +38,7 @@ class Wash(AbstractLight):
 
 class Tradi(AbstractLight):
     """
-    Wash
+    Tradi RGB
     """
 
     address_size = 3
@@ -46,6 +46,33 @@ class Tradi(AbstractLight):
     red = RInt(0, 0)
     green = RInt(0, 1)
     blue = RInt(0, 2)
+
+
+class ParMiskin:
+    """
+    Par 56 led
+    """
+
+    address_size = 8
+
+    red = RInt(0, 0)
+    green = RInt(0, 1)
+    blue = RInt(0, 2)
+    dimmer = RInt(255, 7)
+
+
+class ParLed(AbstractLight):
+    """
+    Par Led Theatre
+    """
+
+    address_size = 7
+
+    red = RInt(0, 0)
+    green = RInt(0, 1)
+    blue = RInt(0, 2)
+
+    dimmer = RInt(255, 6)
 
 
 class Blinder(AbstractLight):
