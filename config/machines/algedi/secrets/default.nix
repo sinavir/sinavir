@@ -10,5 +10,7 @@
       owner = "nginx";
       group = "nginx";
     };
+    "ragb".file = ./ragb.age;
+    "ragb_devkey".file = ./ragb_devkey.age;
   };
 }
