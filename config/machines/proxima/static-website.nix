@@ -17,6 +17,9 @@
           basicAuthFile = config.age.secrets.plansPasswd.path;
         };
       };
+      extraConfig = ''
+        charset utf-8;
+      '';
     };
   };
 }
