@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name =  "zi2"
+authors = [
+    {name = "Adrianos Sidiras", email = "adrianos.sidiras@gmail.com"},
+]
+description = "The goal of this application is to be able to bypass the limitation of using the 4 auxiliary signals of the HF2LI by taking the signals data directly from the HF2LI through the USB port instead of coaxial cables."
+version="1.1"
+requires-python = ">=3.10"
+dependencies = [
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+zi2 = "zi2:main"
+ 
+
+[tool.setuptools]
+include-package-data = true
