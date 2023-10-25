@@ -8,6 +8,7 @@
     ./android.nix
     ./backups.nix
     ./bootloader.nix
+    ./pixiecore.nix
     ./chaise-clavier.nix
     ./docker.nix
     ./hardware-configuration.nix
