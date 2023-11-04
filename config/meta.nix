@@ -1,6 +1,4 @@
 let
-  lib = import ./lib.nix;
-
   sources = import ./npins;
 
   agenix = sources.agenix + "/modules/age.nix";

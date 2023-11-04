@@ -2,7 +2,9 @@ let
   sources = import ./npins;
   metadata = import ./meta.nix;
 
-  lib = import ./lib.nix;
+  defaultNixpkgs = importNixpkgsPath sources."nixos-unstable";
+
+  lib = defaultNixpkgs.lib.extend (import ./lib);
 
   mkNode = node: {
     ${node} = {
@@ -10,18 +12,20 @@ let
       nodes,
       ...
     }: {
-      imports = [./machines/${node}/configuration.nix] ++ metadata.nodes.${node}.imports;
+      imports = [./machines/${node}/configuration.nix] ++ lib.attrByPath [ "imports" ] [] metadata.nodes.${node};
       inherit (metadata.nodes.${node}) deployment;
       nix.nixPath =
         builtins.map (n: "${n}=${sources.${n}}") (builtins.attrNames sources)
         ++ ["nixpkgs=${mkNixpkgsPath name}"];
+      system.nixos.tags = [
+        (builtins.fromJSON (builtins.readFile ./npins/sources.json)).pins.${pkgsVersion node}.revision
+      ];
     };
   };
 
-  mkNixpkgsPath = node: let
-    pkgs-version = lib.attrsOrDefault metadata.nodes.${node} "nixpkgs" "unstable";
-  in
-    sources."nixos-${pkgs-version}";
+  pkgsVersion = node: lib.attrByPath [ node "nixpkgs" ] "nixos-unstable" metadata.nodes;
+
+  mkNixpkgsPath = node: sources.${pkgsVersion node};
 
   mkNixpkgs = node: {
     ${node} = importNixpkgsPath (mkNixpkgsPath node);
@@ -39,8 +43,11 @@ in
   {
     meta = {
       specialArgs = {inherit metadata;};
-      nixpkgs = importNixpkgsPath sources."nixos-unstable";
+      nixpkgs = defaultNixpkgs;
       nodeNixpkgs = concatAttrs (builtins.map mkNixpkgs nodes);
+      specialArgs = {
+        lib = lib;
+      };
     };
   }
   // (concatAttrs (builtins.map mkNode nodes))
