@@ -11,6 +11,7 @@
     comma
     dhcpdump
     dig
+    eza
     git
     htop
     jq
@@ -30,6 +31,11 @@
     wget
     wireguard-tools
   ];
+
+  environment.shellAliases = {
+    ls = "eza";
+    l = "eza -lah --git --git-repos-no-status";
+  };
 
   programs.mosh.enable = !(builtins.elem config.networking.hostName []);
   programs.mtr.enable = true;
