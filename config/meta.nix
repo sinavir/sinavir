@@ -10,24 +10,28 @@ let
         deployment = {
           targetHost = null;
           allowLocalDeployment = true;
+          tags = [ "real" ];
         };
         imports = [agenix home-manager];
       };
       proxima = {
         deployment = {
           targetHost = "proxima";
+          tags = [ "real" ];
         };
         imports = [agenix];
       };
       algedi = {
         deployment = {
           targetHost = "algedi.sinavir.fr";
+          tags = [ "real" ];
         };
         imports = [agenix];
       };
       schedar = {
         deployment = {
           targetHost = "schedar";
+          tags = [ "real" ];
         };
         imports = [agenix];
       };
@@ -35,6 +39,7 @@ let
         deployment = {
           targetHost = "capella";
           buildOnTarget = true;
+          tags = [ "real" ];
         };
         imports = [agenix];
         arch = "aarch64-linux";
@@ -42,6 +47,7 @@ let
       nekkar = {
         deployment = {
           targetHost = null;
+          tags = [ "virtual" ];
         };
         nixpkgs = "nixos-netboot"; # overriding nixos for netboot as it takes time to build
       };

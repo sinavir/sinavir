@@ -5,30 +5,30 @@
   ...
 }: {
   environment.systemPackages = with pkgs; [
-    comma
-    nurl
-    lazygit
     agenix
-    jq
-    nmap
-    ripgrep
+    borgbackup
     colmena
+    comma
+    dhcpdump
     dig
     git
     htop
+    jq
+    lazygit
     mosh
-    screen
-    npins
     nix-index
-    tcpdump
-    dhcpdump
     nixpkgs-fmt
+    nmap
+    npins
+    nurl
+    ripgrep
+    screen
+    tcpdump
     tree
     unzip
     vim
     wget
     wireguard-tools
-    borgbackup
   ];
 
   programs.mosh.enable = !(builtins.elem config.networking.hostName []);
