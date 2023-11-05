@@ -2,9 +2,11 @@ let
   sources = import ./npins;
   metadata = import ./meta.nix;
 
-  defaultNixpkgs = importNixpkgsPath sources."nixos-unstable";
+  defaultNixpkgs = importNixpkgsPath "x86_64-linux" sources."nixos-unstable";
 
   lib = defaultNixpkgs.lib.extend (import ./lib);
+
+  revision = node: (builtins.fromJSON (builtins.readFile ./npins/sources.json)).pins.${pkgsVersion node}.revision;
 
   mkNode = node: {
     ${node} = {
@@ -18,7 +20,7 @@ let
         builtins.map (n: "${n}=${sources.${n}}") (builtins.attrNames sources)
         ++ ["nixpkgs=${mkNixpkgsPath name}"];
       system.nixos.tags = [
-        (builtins.fromJSON (builtins.readFile ./npins/sources.json)).pins.${pkgsVersion node}.revision
+        (revision node)
       ];
     };
   };
@@ -28,12 +30,16 @@ let
   mkNixpkgsPath = node: sources.${pkgsVersion node};
 
   mkNixpkgs = node: {
-    ${node} = importNixpkgsPath (mkNixpkgsPath node);
+    ${node} =
+      importNixpkgsPath
+      (lib.attrByPath [ "arch" ] "x86_64-linux" metadata.nodes.${node})
+      (mkNixpkgsPath node);
   };
 
-  importNixpkgsPath = p: import p {
+  importNixpkgsPath = arch: p: import p {
     config.allowUnfree = true;
     overlays = import ./pkgs/overlays.nix;
+    system = arch;
   };
 
   nodes = builtins.attrNames metadata.nodes;

@@ -37,6 +37,7 @@ let
           buildOnTarget = true;
         };
         imports = [agenix];
+        arch = "aarch64-linux";
       };
     };
   };
