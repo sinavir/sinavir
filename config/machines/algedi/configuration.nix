@@ -9,7 +9,6 @@
   imports = [
     ../../shared
     ./bootloader.nix
-    ./ragb.nix
     ./ernestophone.nix
     ./hardware-configuration.nix
     ./secrets
