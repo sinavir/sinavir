@@ -73,6 +73,18 @@
       "url": null,
       "hash": "056vyjyzw4fi3y4jnzc5h6i5awg5klaxkhb77vrsg4i1qbg6lqmr"
     },
+    "nixos-netboot": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "NixOS",
+        "repo": "nixpkgs"
+      },
+      "branch": "nixos-unstable",
+      "revision": "5e4c2ada4fcd54b99d56d7bd62f384511a7e2593",
+      "url": "https://github.com/NixOS/nixpkgs/archive/5e4c2ada4fcd54b99d56d7bd62f384511a7e2593.tar.gz",
+      "hash": "13dfm5z6r37s7qxryr8jrqinz0xw4i7r0p4y3kpq64a2bwa5rlpl"
+    },
     "nixos-stable": {
       "type": "Git",
       "repository": {

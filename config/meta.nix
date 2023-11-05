@@ -39,6 +39,12 @@ let
         imports = [agenix];
         arch = "aarch64-linux";
       };
+      nekkar = {
+        deployment = {
+          targetHost = null;
+        };
+        nixpkgs = "nixos-netboot"; # overriding nixos for netboot as it takes time to build
+      };
     };
   };
 in
