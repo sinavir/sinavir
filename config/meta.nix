@@ -39,6 +39,7 @@ let
         imports = [agenix];
         arch = "aarch64-linux";
       };
+      nekkar = {};
     };
   };
 in
