@@ -2,7 +2,7 @@
 {
   imports = [ ../../../nixexpr/josh/module.nix ];
   services.josh-proxy = {
-    enable = true;
+    enable = false; # TODO fix josh build
     settings.remotes = [ "https://github.com/sinavir/sinavir" ];
     virtualHost = {
       enable = true;
