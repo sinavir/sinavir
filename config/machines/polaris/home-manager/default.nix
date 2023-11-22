@@ -27,12 +27,26 @@ in {
       enable = true;
     };
   };
+
+
+  dconf.settings = {
+    "org/virt-manager/virt-manager/connections" = {
+      autoconnect = ["qemu:///system"];
+      uris = ["qemu:///system"];
+    };
+  };
+
   programs = {
     gpg = {
       enable = true;
       package = pkgs.gnupg.override {pinentry = pkgs.pinentry;};
     };
-    zathura.enable = true;
+    zathura = {
+      enable = true;
+      extraConfig = ''
+        set selection-clipboard clipboard
+      '';
+    };
     bash = {
       enable = true;
       shellAliases = {
@@ -50,7 +64,7 @@ in {
   };
 
   home.packages = with pkgs; [
-    (python3.withPackages (ps: [ps.black ps.isort ps.numpy ps.scipy ps.matplotlib]))
+    (python3.withPackages (ps: [ps.ipython ps.black ps.isort ps.numpy ps.scipy ps.matplotlib]))
     ruff
     pre-commit
     fluidsynth
@@ -58,6 +72,7 @@ in {
     nodePackages.bash-language-server
     shellcheck
     nix-output-monitor
+    typst
     discord
     firefox-wayland
     lilypond
