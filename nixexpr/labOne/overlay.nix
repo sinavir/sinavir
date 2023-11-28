@@ -7,6 +7,7 @@ final: prev: {
         zhinst-toolkit = python-final.callPackage ./zhinst-toolkit.nix {};
         zhinst-utils = python-final.callPackage ./zhinst-utils.nix {};
         zhinst-meta = python-final.callPackage ./zhinst-meta.nix {};
+        gwyfile = python-final.callPackage ./gwyfile.nix {};
       }
     )
   ];
