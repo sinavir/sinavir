@@ -10,14 +10,14 @@
 
 buildPythonPackage rec {
   pname = "ingredient-parser";
-  version = "0.1.0-beta4";
+  version = "0.1.0-beta7";
   format = "pyproject";
 
   src = fetchFromGitHub {
     owner = "strangetom";
     repo = "ingredient-parser";
     rev = version;
-    hash = "sha256-hgbE520BN0RbPpkzJAJkh4leND0kWjzSRMCtxpJtJMo=";
+    hash = "sha256-YKjwO3uq99eaw9PtDietpyQL9DtAswZJPrW63l1RLho=";
   };
 
   nativeBuildInputs = [

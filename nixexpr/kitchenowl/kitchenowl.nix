@@ -12,19 +12,19 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "kitchenowl-backend";
-  version = "76";
+  version = "91";
 
   src = fetchFromGitHub {
     owner = "TomBursch";
     repo = "kitchenowl-backend";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-cffogyVTv1ogXtCBLo+aUifRwU5kLYBo9GUe8DtnVTg=";
+    hash = "sha256-1g4Mnr3yj1sRWKL4GoNqO6k4p/+hkTcApdv1D34VXEg=";
   };
 
   buildPhase = ''
     echo "Adding pyhome to ini file"
-    echo -e "\npyhome = ${finalAttrs.python}" >> wsgi.ini
-    echo "pythonpath = $out" >> wsgi.ini
+    sed -i "16 a pyhome = ${finalAttrs.python}" wsgi.ini
+    sed -i "17 a pythonpath = $out" wsgi.ini
     echo "patching wsgi file"
     substituteInPlace wsgi.ini --replace wsgi.py "$out/wsgi.py"
     '';
@@ -53,8 +53,15 @@ stdenv.mkDerivation (finalAttrs: {
       '';
     });
   };
-  python = python311.withPackages (ps: let callPackage = ps.callPackage; in [
+  python = python311.withPackages (ps: let
+    callPackage = ps.callPackage;
+    pydantic-core = callPackage ./pydantic-core.nix {};
+    pydantic = callPackage ./pydantic.nix {inherit pydantic-core;};
+  in [
     ps.alembic
+    ps.amqp
+    ps.annotated-types
+    ps.apispec
     ps.appdirs
     ps.apscheduler
     ps.attrs
@@ -62,16 +69,23 @@ stdenv.mkDerivation (finalAttrs: {
     ps.bcrypt
     ps.beautifulsoup4
     ps.bidict
+    ps.billiard
     ps.black
     ps.blinker
     ps.blurhash
+    ps.celery
     ps.certifi
     ps.cffi
     ps.charset-normalizer
     ps.click
+    ps.click-didyoumean
+    ps.click-plugins
+    ps.click-repl
     ps.contourpy
+    ps.cryptography
     ps.cycler
     (callPackage ./dbscan1d.nix {})
+    ps.defusedxml
     ps.extruct
     ps.flake8
     ps.flask
@@ -83,9 +97,9 @@ stdenv.mkDerivation (finalAttrs: {
     ps.flask-socketio
     ps.flask-sqlalchemy
     ps.fonttools
+    ps.future
     ps.gevent
     ps.greenlet
-    #ps.gunicorn
     ps.h11
     ps.html-text
     ps.html5lib
@@ -98,6 +112,7 @@ stdenv.mkDerivation (finalAttrs: {
     ps.joblib
     ps.jstyleson
     ps.kiwisolver
+    ps.kombu
     ps.lark
     ps.lxml
     ps.mako
@@ -110,6 +125,7 @@ stdenv.mkDerivation (finalAttrs: {
     ps.mypy-extensions
     ps.nltk
     ps.numpy
+    (callPackage ./oic.nix {})
     ps.packaging
     ps.pandas
     ps.pathspec
@@ -118,30 +134,38 @@ stdenv.mkDerivation (finalAttrs: {
     ps.pluggy
     ps.prometheus-client
     ps.prometheus-flask-exporter
+    ps.prompt-toolkit
     ps.psycopg2
     ps.py
     ps.pycodestyle
     ps.pycparser
+    ps.pycryptodomex
+    pydantic
+    (callPackage ./pydantic-settings.nix {inherit pydantic;})
+    # pydantic-core -> already included by pydantic
     ps.pyflakes
+    ps.pyjwkest
     ps.pyjwt
     ps.pyparsing
     ps.pyrdfa3
     ps.pytest
     ps.python-crfsuite
     ps.python-dateutil
+    ps.python-dotenv
     ps.python-editor
     ps.python-engineio
     ps.python-socketio
     ps.pytz
     ps.pytz-deprecation-shim
     ps.rdflib
-    #ps.rdflib-jsonld
+    #ps.rdflib-jsonld -> No need since it is now integrated to rdflib
     ps.recipe-scrapers
     ps.regex
     ps.requests
     ps.scikit-learn
     ps.scipy
     ps.setuptools-scm
+    ps.simple-websocket
     ps.six
     ps.soupsieve
     ps.sqlalchemy
@@ -159,6 +183,7 @@ stdenv.mkDerivation (finalAttrs: {
     ps.tzlocal
     ps.urllib3
     ps.w3lib
+    ps.wcwidth
     ps.webencodings
     ps.werkzeug
     ps.wsproto

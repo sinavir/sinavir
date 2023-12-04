@@ -9,14 +9,14 @@
 
 buildPythonPackage rec {
   pname = "flask-apscheduler";
-  version = "1.12.4";
+  version = "1.13.1";
   format = "setuptools";
 
   src = fetchFromGitHub {
     owner = "viniciuschiele";
     repo = "flask-apscheduler";
     rev = version;
-    hash = "sha256-YsqnufOfEIfUt8D8mSSZniEhnsEq3WuyEGl+ivhx9E8=";
+    hash = "sha256-0gZueUuBBpKGWE6OCJiJL/EEIMqCVc3hgLKwIWFuSZI=";
   };
 
   propagatedBuildInputs = [
