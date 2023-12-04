@@ -14,8 +14,10 @@
     extraArgs = [
       "-v"
     ];
-    keyFiles = [ config.age.secrets.tsigNS2.path ];
-    extraConfig = ''
+    # keyFiles = [ config.age.secrets.tsigNS2.path ];
+    settingsFile = pkgs.writeText "knot.conf" ''
+      include: ${config.age.secrets.tsigNS2.path}
+
       server:
           listen: 51.15.171.220@53
           listen: 2001:bc8:34d0::1@53

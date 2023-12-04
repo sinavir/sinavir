@@ -22,4 +22,5 @@
   };
   users.users.nginx.extraGroups = ["netbox"];
   networking.firewall.allowedTCPPorts = [ 443 80 ];
+  services.postgresql.package = pkgs.postgresql_14;
 }
