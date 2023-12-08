@@ -85,7 +85,7 @@ class Blinder(AbstractLight):
     dimmer = RInt(255, 1)
     flash = RInt(0, 2)
     colors = RList(
-        L([Color(rgb=(0, 0, 0)) for i in range(16)]),
+        [Color(rgb=(0, 0, 0)) for i in range(16)],
         3,
         3,
         from_byte=lambda x: Color(f"#{x.hex()}"),
@@ -101,7 +101,7 @@ class LedBar48Ch(AbstractLight):
     address_size = 48
 
     colors = RList(
-        L([Color(rgb=(0, 0, 0)) for i in range(16)]),
+        [Color(rgb=(0, 0, 0)) for i in range(16)],
         0,
         3,
         from_byte=lambda x: Color(f"#{x.hex()}"),

@@ -68,26 +68,21 @@ class AbstractLight:
 
         self._enable_auto_update: bool = False
 
-        # Initialize reactivity
-        def on_modified_factory(key):
-            return lambda value: self.attr_set_hook(key, value)
-
         for key, rValueObject in self.__class__.__dict__.items():
             if isinstance(rValueObject, BaseReactiveValue):
+                # On copie la valeur
                 val = deepcopy(rValueObject.value)
                 if isinstance(val, ReactiveMixin):
-                    val.on_modified_hook = on_modified_factory(key)
+                    val.light = self
+                    val.key = key
                 self._attrs_to_dmx[key] = rValueObject.attr_to_dmx()
 
                 for i, length, callback in rValueObject.dmx_to_attr():
                     for k in range(i, i + length):
                         self._dmx_to_attrs[k] = (key, i, length, callback)
-        self._enable_auto_update: bool = True
-        # Finally set the attributes to their value
-        for key, rValueObject in self.__class__.__dict__.items():
-            if isinstance(rValueObject, BaseReactiveValue):
-                val = rValueObject.value
+                # Finally set the attributes to their value
                 setattr(self, key, val)
+        self._enable_auto_update: bool = True
 
     def register_universe(self, universe: "Universe") -> None:
         """Assign a universe to this light"""

@@ -7,12 +7,20 @@ from typing import Any, Callable, Iterable, Optional
 from .widget import from_bytes, to_bytes
 
 
+class ReactiveMixin:
+    """
+    Mixin for data types that need to update
+    """
+
+    light = None
+    key: Optional[str] = None
+
+
 class BaseReactiveValue:
     """
     Abstract class for defining the parsers between DMX values and object attributes
     """
 
-    key: Optional[str] = None
     address: Optional[list[int]] = None
     value: Any = None
 
@@ -48,7 +56,7 @@ class RInt(BaseReactiveValue):
         self.length: int = length
 
     def dmx_to_attr(self):
-        return [(self.address, self.length, from_bytes)]
+        return [(self.address, self.length, lambda _, b: from_bytes(b))]
 
     def attr_to_dmx(self):
         return (self.address, self.length, lambda x: to_bytes(x, length=self.length))
@@ -74,7 +82,7 @@ class RBool(BaseReactiveValue):
         self.false_val = false_val
 
     def dmx_to_attr(self):
-        return [(self.address, self.length, lambda x: x == self.true_val)]
+        return [(self.address, self.length, lambda _, x: x == self.true_val)]
 
     def attr_to_dmx(self):
         return (
@@ -84,16 +92,7 @@ class RBool(BaseReactiveValue):
         )
 
 
-class ReactiveMixin:
-    """
-    Mixin for data types that need to update
-    """
-
-    def on_modified_hook(value):
-        return None
-
-
-class L(ReactiveMixin):  # pylint: disable=invalid-name
+class L(ReactiveMixin):  # ruff: disable=invalid-name
     """
     Thin wrapper around lists to handle reactivity inside lists
     """
@@ -112,7 +111,8 @@ class L(ReactiveMixin):  # pylint: disable=invalid-name
 
     def __setitem__(self, key, value):
         self._val[key] = value
-        self.on_modified_hook(self)
+        if self.light:
+            self.light.attr_set_hook(self.key, self)
 
     def __iter__(self):
         return self._val.__iter__()
@@ -125,7 +125,7 @@ class RList(BaseReactiveValue):
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        value: L,
+        value: list[Any],
         address: int,
         unit_size: int = 1,
         from_byte: Callable[[bytes], Any] = from_bytes,
@@ -138,7 +138,7 @@ class RList(BaseReactiveValue):
         from_bytes, to_byte: convert function from list value to dmx bytes
                              (and reciprocally)
         """
-        self.value = value
+        self.value = L(value)
         self.address: int = address
         self.unit_size = unit_size
         self.length = len(value) * unit_size
@@ -151,9 +151,9 @@ class RList(BaseReactiveValue):
             Factory to create functions that updates i-th value of list
             """
 
-            def parser(bytes_val):
-                self.value[i] = self.from_byte(bytes_val)
-                return self.value
+            def parser(value, bytes_val):
+                value._val[i] = self.from_byte(bytes_val)
+                return value
 
             return parser
 
@@ -170,5 +170,5 @@ class RList(BaseReactiveValue):
         return (
             self.address,
             self.length,
-            lambda x: b"".join([self.to_byte(i) for i in self.value]),
+            lambda x: b"".join([self.to_byte(i) for i in x]),
         )
