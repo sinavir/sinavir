@@ -48,7 +48,7 @@ class Tradi(AbstractLight):
     blue = RInt(0, 2)
 
 
-class ParMiskin:
+class ParMiskin(AbstractLight):
     """
     Par 56 led
     """
