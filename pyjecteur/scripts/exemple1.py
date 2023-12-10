@@ -1,4 +1,3 @@
-import colorsys
 import logging
 
 from pyjecteur.fixtures import Tradi

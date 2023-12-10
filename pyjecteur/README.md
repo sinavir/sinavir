@@ -25,6 +25,8 @@ def set_dmx(self, addr: int, data: bytes, addr_starting: int = 0) -> None:
     """
 ```
 
+Il existe aussi `pyjecteur.dummy.Widget` qui ne requiert pas de device physique.
+
 Pour des interactions à plus haut niveau, continuez de lire
 
 ### `pyjecteur.lights.Universe`

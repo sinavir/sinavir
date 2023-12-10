@@ -2,12 +2,18 @@
 from colour import Color
 
 from .lights import AbstractLight
-from .reactive import L, RBool, RInt, RList
+from .reactive import RBool, RColor, RInt, RList
 
 
 class Strob(AbstractLight):
     address_size = 2
     freq = RInt(0, 1)
+    dim = RInt(0, 0)
+
+
+class UVBar(AbstractLight):
+    address_size = 3
+    strob = RInt(0, 1)
     dim = RInt(0, 0)
 
 
@@ -27,9 +33,7 @@ class Wash(AbstractLight):
     pan = RInt(0, 0)
     tilt = RInt(0, 1)
     speed = RInt(0, 2)
-    red = RInt(0, 3)
-    green = RInt(0, 4)
-    blue = RInt(0, 5)
+    color = RColor(Color("black"), 3)
     white = RInt(0, 6)
     dimmer = RInt(255, 9)
     shutter = RBool(True, 10, true_val=b"\x15")
@@ -43,21 +47,18 @@ class Tradi(AbstractLight):
 
     address_size = 3
 
-    red = RInt(0, 0)
-    green = RInt(0, 1)
-    blue = RInt(0, 2)
+    color = RColor(Color("black"), 3)
 
 
-class ParMiskin:
+class ParMKII(AbstractLight):
     """
     Par 56 led
     """
 
     address_size = 8
 
-    red = RInt(0, 0)
-    green = RInt(0, 1)
-    blue = RInt(0, 2)
+    color = RColor(Color("black"), 0)
+    amber = RInt(0, 3)
     dimmer = RInt(255, 7)
 
 
@@ -67,10 +68,7 @@ class ParLed(AbstractLight):
     """
 
     address_size = 7
-
-    red = RInt(0, 0)
-    green = RInt(0, 1)
-    blue = RInt(0, 2)
+    color = RColor(Color("black"), 0)
 
     dimmer = RInt(255, 6)
 
@@ -88,8 +86,8 @@ class Blinder(AbstractLight):
         [Color(rgb=(0, 0, 0)) for i in range(16)],
         3,
         3,
-        from_byte=lambda x: Color(f"#{x.hex()}"),
-        to_byte=lambda x: bytes.fromhex(x.hex_l[1:]),
+        from_byte=RColor.from_bytes,
+        to_byte=RColor.to_bytes,
     )
 
 

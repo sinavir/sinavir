@@ -1,7 +1,6 @@
-import colorsys
 import logging
 
-from pyjecteur.fixtures import Strob, Tradi
+from pyjecteur.fixtures import Strob
 from pyjecteur.lights import Universe
 from pyjecteur.widget import Widget
 

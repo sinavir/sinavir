@@ -4,6 +4,8 @@ Module holding classes for easy specification of fixtures attributes
 
 from typing import Any, Callable, Iterable, Optional
 
+from colour import Color
+
 from .widget import from_bytes, to_bytes
 
 
@@ -89,6 +91,39 @@ class RBool(BaseReactiveValue):
             self.address,
             self.length,
             lambda x: self.true_val if x else self.false_val,
+        )
+
+
+class RColor(BaseReactiveValue):
+    """
+    Boolean light attribute
+    """
+
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        value,
+        address,
+    ):
+        self.value = value
+        self.address = address
+        self.length = 3
+
+    @staticmethod
+    def from_bytes(x):
+        return Color(f"#{x.hex()}")
+
+    @staticmethod
+    def to_bytes(x):
+        return bytes.fromhex(x.hex_l[1:])
+
+    def dmx_to_attr(self):
+        return [(self.address, self.length, lambda _, x: self.from_bytes(x))]
+
+    def attr_to_dmx(self):
+        return (
+            self.address,
+            self.length,
+            self.to_bytes,
         )
 
 

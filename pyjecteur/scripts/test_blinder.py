@@ -1,4 +1,3 @@
-import colorsys
 import logging
 
 from pyjecteur.fixtures import Blinder
@@ -13,6 +12,6 @@ else:
 w = Widget("/dev/ttyUSB0")
 
 u = Universe(w)
-c = Blinder()
+blinder = Blinder()
 
-u.register(c, 299)
+u.register(blinder, 299)
