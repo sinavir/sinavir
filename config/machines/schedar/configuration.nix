@@ -16,6 +16,7 @@
       ./secrets
       ../../shared
       ./hardware-configuration.nix
+      ./kfet-open-recorder.nix
       ./netbox-dgnum.nix
     ];
 
