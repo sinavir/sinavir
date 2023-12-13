@@ -6,6 +6,7 @@
 }: {
   environment.systemPackages = with pkgs; [
     agenix
+    sqlite-web
     borgbackup
     colmena
     comma
