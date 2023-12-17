@@ -11,10 +11,6 @@ in {
   services.postgresql.ensureUsers = [
     {
       name = "root";
-      ensurePermissions = {
-        "DATABASE netbox" = "CONNECT";
-        "ALL TABLES IN SCHEMA public" = "SELECT";
-      };
     }
   ];
   services.borgmatic = {
@@ -39,4 +35,6 @@ in {
       };
     };
   };
+  systemd.services.borgmatic.path = [ config.services.postgresql.package ];
+
 }

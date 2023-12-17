@@ -34,7 +34,6 @@
   ];
 
   environment.shellAliases = {
-    ls = "eza";
     l = "eza -lah --git --git-repos-no-status";
   };
 

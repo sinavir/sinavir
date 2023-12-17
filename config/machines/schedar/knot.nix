@@ -14,7 +14,6 @@
     extraArgs = [
       "-v"
     ];
-    # keyFiles = [ config.age.secrets.tsigNS2.path ];
     settingsFile = pkgs.writeText "knot.conf" ''
       include: ${config.age.secrets.tsigNS2.path}
 

@@ -18,7 +18,7 @@
       vim-wayland-clipboard
       vim-svelte
       ale
-      (pkgs.vimUtils.buildVimPluginFrom2Nix {
+      (pkgs.vimUtils.buildVimPlugin {
         pname = "vim-lark-syntax";
         version = "2020-09-18";
         src = pkgs.fetchFromGitHub {
@@ -28,7 +28,7 @@
           sha256 = "sha256-FlgguTfMbhh4q1f+eVnb+Q9OmlSM+w148ZJp4t6zdYo=";
         };
       })
-      (pkgs.vimUtils.buildVimPluginFrom2Nix {
+      (pkgs.vimUtils.buildVimPlugin {
         name = "typst.vim";
         src = pkgs.fetchFromGitHub {
           owner = "kaarmu";
