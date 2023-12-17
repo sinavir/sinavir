@@ -17,6 +17,9 @@ class ReactiveMixin:
     light = None
     key: Optional[str] = None
 
+    def set_all(self, new_val):
+        raise NotImplementedError("Can't assign value here")
+
 
 class BaseReactiveValue:
     """
@@ -146,6 +149,11 @@ class L(ReactiveMixin):  # ruff: disable=invalid-name
 
     def __setitem__(self, key, value):
         self._val[key] = value
+        if self.light:
+            self.light.attr_set_hook(self.key, self)
+
+    def set_all(self, new_value):
+        self._val = new_value
         if self.light:
             self.light.attr_set_hook(self.key, self)
 
