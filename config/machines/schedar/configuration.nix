@@ -17,7 +17,7 @@
       ../../shared
       ./hardware-configuration.nix
       ./kfet-open-recorder.nix
-      ./netbox-dgnum.nix
+      ./netbox-dgnum
     ];
 
   boot.loader.grub = {
