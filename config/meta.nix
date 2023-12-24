@@ -44,10 +44,19 @@ let
         imports = [agenix];
         arch = "aarch64-linux";
       };
+      rigel = {
+        deployment = {
+          #buildOnTarget = true;
+          targetHost = "10.1.1.1";
+          tags = [ "image" ];
+        };
+        imports = [agenix];
+        arch = "aarch64-linux";
+      };
       nekkar = {
         deployment = {
           targetHost = null;
-          tags = [ "virtual" ];
+          tags = [ "image" ];
         };
         nixpkgs = "nixos-netboot"; # overriding nixos for netboot as it takes time to build
       };

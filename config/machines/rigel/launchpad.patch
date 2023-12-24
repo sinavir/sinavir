@@ -1,0 +1,13 @@
+diff --git a/pyproject.toml b/pyproject.toml
+index dd2e48c..48339c9 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -42,7 +42,7 @@ black = "*"
+ 
+ 
+ [build-system]
+-requires = ["poetry>=1.7.1"]
++requires = ["poetry-core"]
+ build-backend = "poetry.core.masonry.api"
+ 
+ [tool.isort]
