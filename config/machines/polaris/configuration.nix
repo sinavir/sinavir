@@ -6,6 +6,7 @@
   imports = [
     ../../shared
     ./android.nix
+    ./aarch64.nix
     ./backups.nix
     ./bootloader.nix
     ./pixiecore.nix
