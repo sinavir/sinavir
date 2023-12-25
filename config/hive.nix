@@ -1,10 +1,26 @@
 let
   sources = import ./npins;
+  patchedSources = let
+    patches = import ./patches;
+  in
+    lib.mapAttrs (name: value:
+      if builtins.hasAttr name patches
+      then stage0Nixpkgs.applyPatches {
+        name = "${name}-patched";
+        src = value;
+        patches = patches.${name};
+      }
+      else value
+    )
+    sources;
+
   metadata = import ./meta.nix;
 
-  defaultNixpkgs = importNixpkgsPath "x86_64-linux" sources."nixos-unstable";
+  defaultNixpkgs = importNixpkgsPath "x86_64-linux" patchedSources."nixos-unstable";
 
-  lib = defaultNixpkgs.lib.extend (import ./lib);
+  stage0Nixpkgs = importNixpkgsPath "x86_64-linux" sources."nixos-unstable";
+
+  lib = stage0Nixpkgs.lib.extend (import ./lib);
 
   revision = node: (builtins.fromJSON (builtins.readFile ./npins/sources.json)).pins.${pkgsVersion node}.revision;
 
@@ -17,7 +33,7 @@ let
       imports = [./machines/${node}/configuration.nix] ++ lib.attrByPath [ "imports" ] [] metadata.nodes.${node};
       inherit (metadata.nodes.${node}) deployment;
       nix.nixPath =
-        builtins.map (n: "${n}=${sources.${n}}") (builtins.attrNames sources)
+        builtins.map (n: "${n}=${patchedSources.${n}}") (builtins.attrNames patchedSources)
         ++ ["nixpkgs=${mkNixpkgsPath name}"];
       system.nixos.tags = [
         (revision node)
@@ -27,7 +43,7 @@ let
 
   pkgsVersion = node: lib.attrByPath [ node "nixpkgs" ] "nixos-unstable" metadata.nodes;
 
-  mkNixpkgsPath = node: sources.${pkgsVersion node};
+  mkNixpkgsPath = node: patchedSources.${pkgsVersion node};
 
   mkNixpkgs = node: {
     ${node} =
