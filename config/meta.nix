@@ -38,7 +38,7 @@ let
       capella = {
         deployment = {
           targetHost = "capella";
-          buildOnTarget = true;
+          #buildOnTarget = true;
           tags = [ "real" ];
         };
         imports = [agenix];
