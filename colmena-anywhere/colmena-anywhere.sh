@@ -15,6 +15,7 @@ Exemple:
     ./colmena-anywhere.sh node root@example.com"
 
 extra_args=""
+dry_run=no
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
