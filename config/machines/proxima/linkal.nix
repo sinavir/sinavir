@@ -25,7 +25,7 @@
       });
   in {
     "calendars" = mapAddPrefix "https://cloud.eleves.ens.fr/remote.php/dav/public-calendars/" {
-      "fRtjDkjrZyn6fxd8" = {
+      "QXGnDTA8GS6r876F" = {
         "name" = "K-Fêt";
       };
       "gsZtZK8c9EmREofn" = {
