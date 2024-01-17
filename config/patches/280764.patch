@@ -1,0 +1,152 @@
+From a334fb46635ab096c8d03c37ef80f2d9706625ef Mon Sep 17 00:00:00 2001
+From: Fabian Affolter <mail@fabian-affolter.ch>
+Date: Sat, 13 Jan 2024 17:27:47 +0100
+Subject: [PATCH 1/2] python311Packages.dj-rest-auth: refactor
+
+---
+ .../python-modules/dj-rest-auth/default.nix   | 26 ++++++++-----------
+ 1 file changed, 11 insertions(+), 15 deletions(-)
+
+diff --git a/pkgs/development/python-modules/dj-rest-auth/default.nix b/pkgs/development/python-modules/dj-rest-auth/default.nix
+index bbbb2aeabd032c..4c6751d8f43b5e 100644
+--- a/pkgs/development/python-modules/dj-rest-auth/default.nix
++++ b/pkgs/development/python-modules/dj-rest-auth/default.nix
+@@ -1,15 +1,15 @@
+ { lib
+ , buildPythonPackage
+-, fetchFromGitHub
+-, fetchpatch
+ , django
+ , django-allauth
+ , djangorestframework
+ , djangorestframework-simplejwt
+-, responses
+-, unittest-xml-reporting
++, fetchFromGitHub
+ , python
++, pythonOlder
++, responses
+ , setuptools
++, unittest-xml-reporting
+ }:
+ 
+ buildPythonPackage rec {
+@@ -17,6 +17,8 @@ buildPythonPackage rec {
+   version = "5.0.2";
+   pyproject = true;
+ 
++  disabled = pythonOlder "3.6";
++
+   src = fetchFromGitHub {
+     owner = "iMerica";
+     repo = "dj-rest-auth";
+@@ -24,17 +26,8 @@ buildPythonPackage rec {
+     hash = "sha256-TqeNpxXn+v89fEiJ4AVNhp8blCfYQKFQfYmZ6/QlRbQ=";
+   };
+ 
+-  patches = [
+-    (fetchpatch {
+-      # https://github.com/iMerica/dj-rest-auth/pull/561
+-      url = "https://github.com/iMerica/dj-rest-auth/commit/be0cf53d94582183320b0994082f0a312c1066d9.patch";
+-      hash = "sha256-BhZ7BWW8m609cVn1WCyPfpZq/706YVZAesrkcMKTD3A=";
+-    })
+-  ];
+-
+   postPatch = ''
+     substituteInPlace setup.py \
+-      --replace "coveralls>=1.11.1" "" \
+       --replace "==" ">="
+   '';
+ 
+@@ -61,7 +54,7 @@ buildPythonPackage rec {
+   ] ++ passthru.optional-dependencies.with_social;
+ 
+   preCheck = ''
+-    # connects to graph.facebook.com
++    # Test connects to graph.facebook.com
+     substituteInPlace dj_rest_auth/tests/test_serializers.py \
+       --replace "def test_http_error" "def dont_test_http_error"
+   '';
+@@ -72,11 +65,14 @@ buildPythonPackage rec {
+     runHook postCheck
+   '';
+ 
+-  pythonImportsCheck = [ "dj_rest_auth" ];
++  pythonImportsCheck = [
++    "dj_rest_auth"
++  ];
+ 
+   meta = with lib; {
+     description = "Authentication for Django Rest Framework";
+     homepage = "https://github.com/iMerica/dj-rest-auth";
++    changelog = "https://github.com/iMerica/dj-rest-auth/releases/tag/${version}";
+     license = licenses.mit;
+     maintainers = with maintainers; [ ];
+   };
+
+From cce7e85bb428439941f5885243b33094a1a4feee Mon Sep 17 00:00:00 2001
+From: Fabian Affolter <mail@fabian-affolter.ch>
+Date: Sat, 13 Jan 2024 17:43:50 +0100
+Subject: [PATCH 2/2] python311Packages.django-allauth: 0.57.0 -> 0.60.0
+
+Changelog: https://github.com/pennersr/django-allauth/blob/0.60.0/ChangeLog.rst
+---
+ .../python-modules/django-allauth/default.nix | 23 +++++++++++--------
+ 1 file changed, 13 insertions(+), 10 deletions(-)
+
+diff --git a/pkgs/development/python-modules/django-allauth/default.nix b/pkgs/development/python-modules/django-allauth/default.nix
+index 49864b0b9bbb52..31a70436936550 100644
+--- a/pkgs/development/python-modules/django-allauth/default.nix
++++ b/pkgs/development/python-modules/django-allauth/default.nix
+@@ -28,16 +28,16 @@
+ 
+ buildPythonPackage rec {
+   pname = "django-allauth";
+-  version = "0.57.0";
+-  format = "pyproject";
++  version = "0.60.0";
++  pyproject = true;
+ 
+   disabled = pythonOlder "3.7";
+ 
+   src = fetchFromGitHub {
+     owner = "pennersr";
+-    repo = pname;
+-    rev = version;
+-    hash = "sha256-zhKqvm43rw28UKNFdfJ2C1dIeZfPqmchb1rJykm1lx4=";
++    repo = "django-allauth";
++    rev = "refs/tags/${version}";
++    hash = "sha256-hkzZl2eZKti6m06LTtBqVXmsj6IFztsV2Of6tPiej+I=";
+   };
+ 
+   nativeBuildInputs = [
+@@ -46,12 +46,11 @@ buildPythonPackage rec {
+ 
+   propagatedBuildInputs = [
+     django
+-    python3-openid
+     pyjwt
++    python3-openid
+     requests
+     requests-oauthlib
+-  ]
+-  ++ pyjwt.optional-dependencies.crypto;
++  ] ++ pyjwt.optional-dependencies.crypto;
+ 
+   passthru.optional-dependencies = {
+     saml = [
+@@ -70,8 +69,12 @@ buildPythonPackage rec {
+     pillow
+     pytestCheckHook
+     pytest-django
+-  ]
+-  ++ lib.flatten (builtins.attrValues passthru.optional-dependencies);
++  ] ++ lib.flatten (builtins.attrValues passthru.optional-dependencies);
++
++  disabledTests = [
++    # Tests require network access
++    "test_login"
++  ];
+ 
+   passthru.tests = {
+     inherit dj-rest-auth;

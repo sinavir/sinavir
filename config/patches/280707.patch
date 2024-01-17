@@ -1,0 +1,83 @@
+From 5ead65aa8720b3c0cecc57e23530cf2048fe67e5 Mon Sep 17 00:00:00 2001
+From: Fabian Affolter <mail@fabian-affolter.ch>
+Date: Sat, 13 Jan 2024 12:19:10 +0100
+Subject: [PATCH] python311Packages.python3-saml: disable failing tests
+
+- switch to pytestCheckHook
+- add patch for build system
+---
+ .../python-modules/python3-saml/default.nix   | 31 ++++++++++++++++++-
+ 1 file changed, 30 insertions(+), 1 deletion(-)
+
+diff --git a/pkgs/development/python-modules/python3-saml/default.nix b/pkgs/development/python-modules/python3-saml/default.nix
+index cca583157ef8eb..adfea3091c718d 100644
+--- a/pkgs/development/python-modules/python3-saml/default.nix
++++ b/pkgs/development/python-modules/python3-saml/default.nix
+@@ -1,17 +1,20 @@
+ { lib
+ , buildPythonPackage
+ , fetchFromGitHub
++, fetchpatch
+ , freezegun
+ , isodate
+ , lxml
++, pytestCheckHook
+ , pythonOlder
++, poetry-core
+ , xmlsec
+ }:
+ 
+ buildPythonPackage rec {
+   pname = "python3-saml";
+   version = "1.16.0";
+-  format = "setuptools";
++  pyproject = true;
+ 
+   disabled = pythonOlder "3.7";
+ 
+@@ -22,6 +25,19 @@ buildPythonPackage rec {
+     hash = "sha256-KyDGmqhg/c29FaXPKK8rWKSBP6BOCpKKpOujCavXUcc=";
+   };
+ 
++  patches = [
++    # Fix build system, https://github.com/SAML-Toolkits/python3-saml/pull/341
++    (fetchpatch {
++      name = "switch-to-poetry-core.patch";
++      url = "https://github.com/SAML-Toolkits/python3-saml/commit/231a7e19543138fdd7424c01435dfe3f82bbe9ce.patch";
++      hash = "sha256-MvX1LXhf3LJUy3O7L0/ySyVY4KDGc/GKJud4pOkwVIk=";
++    })
++  ];
++
++  nativeBuildInputs = [
++    poetry-core
++  ];
++
+   propagatedBuildInputs = [
+     isodate
+     lxml
+@@ -30,12 +46,25 @@ buildPythonPackage rec {
+ 
+   nativeCheckInputs = [
+     freezegun
++    pytestCheckHook
+   ];
+ 
+   pythonImportsCheck = [
+     "onelogin.saml2"
+   ];
+ 
++  disabledTests = [
++    # Tests require network acces or additions files
++    "OneLogin_Saml2_Metadata_Test"
++    "OneLogin_Saml2_Response_Test"
++    "OneLogin_Saml2_Utils_Test"
++    "OneLogin_Saml2_Settings_Test"
++    "OneLogin_Saml2_Auth_Test"
++    "OneLogin_Saml2_Authn_Request_Test"
++    "OneLogin_Saml2_IdPMetadataParser_Test"
++    "OneLogin_Saml2_Logout_Request_Test"
++  ];
++
+   meta = with lib; {
+     description = "OneLogin's SAML Python Toolkit";
+     homepage = "https://github.com/onelogin/python3-saml";
