@@ -67,7 +67,7 @@ in {
       type = with types;
         attrsOf (submodule {
           freeformType = settingsFormat.type;
-          options.location = {
+          options = {
             source_directories = mkOption {
               type = listOf str;
               description = lib.mdDoc ''

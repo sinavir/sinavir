@@ -18,20 +18,18 @@ in {
     startAt = "*-*-* 20:00:00";
     configurations = {
       "netboxdb" = {
-        storage.ssh_command = "ssh -o 'UserKnownHostsFile ${knownHost}' -i ${config.age.secrets."bk-key".path}";
-        location.source_directories = [
+        ssh_command = "ssh -o 'UserKnownHostsFile ${knownHost}' -i ${config.age.secrets."bk-key".path}";
+        source_directories = [
           "/var/lib/netbox"
         ];
-        location.repositories = ["ssh://borg@${bkhost}/./netbox"];
-        hooks.postgresql_databases = [
+        repositories = ["ssh://borg@${bkhost}/./netbox"];
+        postgresql_databases = [
           { name = "netbox"; }
         ];
-        retention = {
-          keep_daily = 7;
-          keep_weekly = 1;
-          keep_monthly = 4;
-        };
-        storage.encryption_passcommand = "cat ${config.age.secrets."bk-passwd".path}";
+        keep_daily = 7;
+        keep_weekly = 1;
+        keep_monthly = 4;
+        encryption_passcommand = "cat ${config.age.secrets."bk-passwd".path}";
       };
     };
   };

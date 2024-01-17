@@ -13,17 +13,28 @@ in {
     startAt = "*-*-* 20:10:00";
     configurations = {
       "mails" = {
-        storage.ssh_command = "ssh -o 'UserKnownHostsFile ${knownHost}' -i ${config.age.secrets."bk-key".path}";
-        location.source_directories = [
+        ssh_command = "ssh -o 'UserKnownHostsFile ${knownHost}' -i ${config.age.secrets."bk-key".path}";
+        source_directories = [
           "/var/vmail"
         ];
-        location.repositories = ["ssh://borg@${bkhost}/./mails"];
-        retention = {
-          keep_daily = 7;
-          keep_weekly = 1;
-          keep_monthly = 4;
-        };
-        storage.encryption_passcommand = "cat ${config.age.secrets."bk-passwd".path}";
+        repositories = [{
+          path= "ssh://borg@${bkhost}/./mails";
+        }];
+        keep_daily = 7;
+        keep_weekly = 1;
+        keep_monthly = 4;
+        encryption_passcommand = "cat ${config.age.secrets."bk-passwd".path}";
+      };
+      "pass" = {
+        ssh_command = "ssh -o 'UserKnownHostsFile ${knownHost}' -i ${config.age.secrets."bk-key".path}";
+        source_directories = [
+          "/var/lib/bitwarden_rs"
+        ];
+        repositories = ["ssh://borg@${bkhost}/./pass"];
+        keep_daily = 7;
+        keep_weekly = 1;
+        keep_monthly = 4;
+        encryption_passcommand = "cat ${config.age.secrets."bk-passwd".path}";
       };
     };
   };
