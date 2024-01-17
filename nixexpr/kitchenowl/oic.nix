@@ -3,6 +3,13 @@
 , fetchFromGitHub
 , setuptools
 , wheel
+, requests
+, pycryptodomex
+, pydantic-settings
+, pyjwkest
+, mako
+, cryptography
+, defusedxml
 }:
 
 buildPythonPackage rec {
@@ -21,7 +28,17 @@ buildPythonPackage rec {
     setuptools
     wheel
   ];
+    
 
+  propagatedBuildInputs = [
+    requests
+    pycryptodomex
+    pydantic-settings
+    pyjwkest
+    mako
+    cryptography
+    defusedxml
+  ];
   pythonImportsCheck = [ "oic" ];
 
   meta = with lib; {

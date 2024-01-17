@@ -12,13 +12,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "kitchenowl-backend";
-  version = "91";
+  version = "93";
 
   src = fetchFromGitHub {
     owner = "TomBursch";
     repo = "kitchenowl-backend";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-1g4Mnr3yj1sRWKL4GoNqO6k4p/+hkTcApdv1D34VXEg=";
+    hash = "sha256-+6ENfrWAqHmu8J/JoAXl80ooxIAJs9RfWFHqI/Z/+Y8=";
   };
 
   buildPhase = ''
@@ -55,8 +55,6 @@ stdenv.mkDerivation (finalAttrs: {
   };
   python = python311.withPackages (ps: let
     callPackage = ps.callPackage;
-    pydantic-core = callPackage ./pydantic-core.nix {};
-    pydantic = callPackage ./pydantic.nix {inherit pydantic-core;};
   in [
     ps.alembic
     ps.amqp
@@ -140,8 +138,7 @@ stdenv.mkDerivation (finalAttrs: {
     ps.pycodestyle
     ps.pycparser
     ps.pycryptodomex
-    pydantic
-    (callPackage ./pydantic-settings.nix {inherit pydantic;})
+    ps.pydantic
     # pydantic-core -> already included by pydantic
     ps.pyflakes
     ps.pyjwkest
@@ -169,6 +166,7 @@ stdenv.mkDerivation (finalAttrs: {
     ps.six
     ps.soupsieve
     ps.sqlalchemy
+    (callPackage ./sqlite-icu.nix {})
     ps.threadpoolctl
     ps.toml
     ps.tomli
