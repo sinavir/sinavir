@@ -1,4 +1,4 @@
-@ IN SOA ns1.sinavir.fr. dns.sinavir.fr. 90 86400 7200 3600000 172800
+@ IN SOA ns1.sinavir.fr. dns.sinavir.fr. 100 86400 7200 3600000 172800
 @ IN NS ns1.sinavir.fr.
 @ IN NS ns2.sinavir.fr.
                         IN A      51.210.243.54
@@ -18,7 +18,7 @@ ns1                     IN AAAA   2001:bc8:34d0::1
 ns2                     IN A      51.210.243.54
 ns2                     IN AAAA   2001:41d0:404:200::81a1
 
-_dmarc                  IN TXT    ( "v=DMARC1;p=none;" )
+_dmarc                  IN TXT    ( "v=DMARC1;p=quarantine;" )
 mail                    IN A      51.210.243.54
 mail                    IN AAAA   2001:41d0:404:200::81a1
 mail._domainkey         IN TXT    ( "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDBhTFveZHJ31GccPmatMS3P9IH4tOUf2lnEM80vEHPwJSLi1Fpj5n2yEp8c8Gpah2aNE0Re6O2bczHbsIZzS+VROtqnvUs6/6xR3OIC1Dr/q5Vh1w6gc4l/plmvrgv4qJ64YjrBHvw4djuu8tcg4hjlo5nIEYeSUm8YHdpxWlUxwIDAQAB" )
