@@ -12,6 +12,7 @@
       ./backups.nix
       ./networking.nix
       ./kitchenowl.nix
+      ./ernestophone.nix
       ./uptime-kuma.nix
       ./secrets
       ../../shared
