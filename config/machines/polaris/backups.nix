@@ -35,10 +35,9 @@ in {
           "/etc/NetworkManager/system-connections/"
           "/var/lib/paperless"
         ];
-        repositories = [{
-          path = "ssh://borg@${bkhost}/./polaris-home";
-          label = "backupserver";
-        }];
+        repositories = [
+          "ssh://borg@${bkhost}/./polaris-home"
+        ];
         exclude_if_present = [".nobackup"];
         keep_daily = 1;
         keep_weekly = 1;

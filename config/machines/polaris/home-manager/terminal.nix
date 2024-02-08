@@ -3,7 +3,7 @@
     enable = true;
     settings = {
       import = [
-        ./alacritty.yml
+        ./alacritty.toml
       ];
     };
   };
