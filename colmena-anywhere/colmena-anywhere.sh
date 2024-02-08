@@ -4,6 +4,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 usage="$(basename "$0") [-h] [--dryrun] NODE HOST [-- NIXOS_ANYWHERE_EXTRA_ARGS]
 Deploy a brand new nixos system using colmena and nixos anywhere
 
@@ -55,7 +57,7 @@ if [[ -z ${host-} ]]; then
 fi
 
 # Get info about the derivation containing the 'nixos-anywhere' invocation
-script_infos=$(colmena eval -E "args: import ./colmena-anywhere.nix (args // { node=\"$node\"; host=\"$host\"; extraArgs=\"$extra_args\"; })")
+script_infos=$(colmena eval -E "args: import $SCRIPT_DIR/colmena-anywhere.nix (args // { node=\"$node\"; host=\"$host\"; extraArgs=\"$extra_args\"; })")
 
 # realise derivation (because colmena eval only eval stuff)
 echo "$script_infos" | jq -r ".drvPath" | xargs nix-store -r
