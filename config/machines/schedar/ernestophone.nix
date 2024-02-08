@@ -10,7 +10,6 @@
       enableACME = true;
       forceSSL = true;
       locations."/".return = "302 https://ernestophone.ens.fr";
-      locations."/hacked".root = ./hack;
     };
     virtualHosts."ernestoburo.ernestophone.fr" = {
       enableACME = true;
