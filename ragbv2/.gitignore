@@ -1,0 +1,14 @@
+/ragb-backend/target
+# general things to ignore
+build/
+dist/
+*.egg-info/
+*.egg
+*.py[cod]
+__pycache__/
+*.so
+*~
+
+.ruff_cache
+
+/redis-tmp
