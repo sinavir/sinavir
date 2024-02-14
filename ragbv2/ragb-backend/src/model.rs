@@ -1,3 +1,4 @@
+use dotenvy;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::{broadcast, RwLock};
@@ -57,7 +58,7 @@ pub type DB = Arc<SharedState>;
 pub fn make_db() -> DB {
     Arc::new(SharedState {
         static_state: StaticState {
-            jwt_key: String::from("test"),
+            jwt_key: dotenvy::var("JWT_SECRET").unwrap_or(String::from("secret")),
             color_change_channel: broadcast::Sender::new(16),
         },
         mut_state: RwLock::new(AppState::new(512)),
