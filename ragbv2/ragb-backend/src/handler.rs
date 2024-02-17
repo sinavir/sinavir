@@ -6,6 +6,7 @@ use axum::{
     response::{sse::Event, IntoResponse, Sse},
     Json,
 };
+use std::slice::Iter;
 use std::time::Duration;
 use tokio_stream::StreamExt;
 use tokio_stream::{self as stream};
@@ -64,7 +65,11 @@ pub async fn edit_value_handler(
     let mut lock = db.mut_state.write().await;
     check_id(id, &lock.dmx)?;
     lock.dmx[id] = body;
-    match db.static_state.color_change_channel.send(DMXAtom::new(id, body)) {
+    match db
+        .static_state
+        .color_change_channel
+        .send(DMXAtom::new(id, body))
+    {
         Ok(_) => (),
         Err(_) => (),
     };
@@ -75,10 +80,24 @@ pub async fn edit_value_handler(
 #[debug_handler]
 pub async fn sse_handler(State(db): State<DB>) -> impl IntoResponse {
     let rx = db.static_state.color_change_channel.subscribe();
-    let stream = stream::wrappers::BroadcastStream::new(rx).filter_map(|item| match item {
-        Ok(val) => Some(Event::default().json_data(val)),
-        Err(_) => None,
+    let data: Vec<DMXColor>;
+    {
+        let lock = db.mut_state.read().await;
+        data = lock.dmx.clone();
+    }
+    let init_data = data.into_iter().enumerate().map(|(i, x)| {
+        Ok(DMXAtom {
+            address: i,
+            value: x,
+        })
     });
+    let init = stream::iter(init_data);
+    let stream = init
+        .chain(stream::wrappers::BroadcastStream::new(rx))
+        .filter_map(|item| match item {
+            Ok(val) => Some(Event::default().json_data(val)),
+            Err(_) => None,
+        });
 
     Sse::new(stream).keep_alive(
         axum::response::sse::KeepAlive::new()
