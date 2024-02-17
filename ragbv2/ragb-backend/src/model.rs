@@ -1,5 +1,6 @@
 use dotenvy;
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 use std::sync::Arc;
 use tokio::sync::{broadcast, RwLock};
 
@@ -56,11 +57,13 @@ pub struct SharedState {
 pub type DB = Arc<SharedState>;
 
 pub fn make_db() -> DB {
+    let state_size: usize =
+        usize::from_str(&dotenvy::var("NB_DMX_VALUES").unwrap_or(String::from("100"))).unwrap();
     Arc::new(SharedState {
         static_state: StaticState {
             jwt_key: dotenvy::var("JWT_SECRET").unwrap_or(String::from("secret")),
             color_change_channel: broadcast::Sender::new(16),
         },
-        mut_state: RwLock::new(AppState::new(512)),
+        mut_state: RwLock::new(AppState::new(state_size)),
     })
 }
