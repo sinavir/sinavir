@@ -13,28 +13,39 @@ use serde::{Deserialize, Serialize};
 struct Claims {
     sub: String,
     scope: String,
+    user: User,
 }
 
-fn check_token(token: &str, jwt: &str) -> bool {
+#[derive(Eq, PartialEq, Hash, Debug, Serialize, Deserialize, Clone)]
+pub struct User(String);
+
+fn check_token(token: &str, jwt: &str) -> Option<User> {
     let decoded_token = decode::<Claims>(
         &token,
         &DecodingKey::from_secret(jwt.as_bytes()),
         &Validation::new(Algorithm::HS256),
     );
     match decoded_token {
-        Ok(token_data) => token_data.claims.scope == "modify",
-        Err(_) => false,
+        Ok(token_data) => {
+            if token_data.claims.scope == "modify" {
+                Some(token_data.claims.user)
+            } else {
+                None
+            }
+        }
+        Err(_) => None,
     }
 }
 
 pub async fn jwt_middleware(
     State(state): State<DB>,
     TypedHeader(auth): TypedHeader<headers::Authorization<headers::authorization::Bearer>>,
-    request: Request,
+    mut request: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
     let token = auth.token();
-    if check_token(token, &state.static_state.jwt_key) {
+    if let Some(user) = check_token(token, &state.static_state.jwt_key) {
+        request.extensions_mut().insert(user);
         Ok(next.run(request).await)
     } else {
         Err(StatusCode::FORBIDDEN)

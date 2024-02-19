@@ -1,0 +1,54 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block content %}
+
+<section class="section content container is-max-desktop">
+  <h1 class="title is-3">{{ object.name }}</h1>
+  <svg viewBox="-1 -1 162 12" version="1.1" id="barreled" >
+    <style>
+      rect {
+        fill: white;
+        stroke: black;
+        stroke-width: 1;
+      }
+      {% if user.is_authenticated %}
+      rect:hover {
+        stroke: grey;
+      }
+      {% endif %}
+    </style>
+    <g id="layer1">
+      {% for light in lights %}
+      <rect id="light{{ light.id }}" width="10" height="10" x="{{ light.position }}" y="0" class="modal-trigger" data-target="modal-light{{ light.id }}" />
+      {% endfor %}
+    </g>
+  </svg>
+</section>
+
+{% if user.is_authenticated %}
+{% for light in lights %}
+<dialog id="modal-light{{light.id}}">
+  <article>
+    <header>
+      <button class="close-modal" rel="prev" aria-label="close"></button>
+      <h3>Couleur du pixel n°{{light.id}}</h3>
+    </header>
+    <section>
+      <form>
+        <input id="input-light{{light.id}}" class="input" type="color" name="light{{light.id}}">
+        <button class="save-color" data-target="{{light.id}}">Enregistrer</button>
+      </form>
+    </section>
+  </article>
+</dialog>
+{% endfor %}
+{% endif %}
+<dialog open id="modal-loading">
+  <article aria-busy="true"></article>
+</dialog>
+<script>const WEBSOCKET_ENDPOINT = "{{ websocket_endpoint }}";</script>
+{% if user.is_authenticated %}
+<script>const JWT = "{{ jwt }}";</script>
+{% endif %}
+<script src="{% static "js/update-color.js" %}" defer></script>
+{% endblock %}

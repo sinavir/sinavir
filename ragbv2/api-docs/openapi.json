@@ -1,0 +1,189 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "R/AGB",
+    "description": "Une API pour choisir les couleurs en agb. Il existe un endpoint SSE pour être notifié des mises à jour des couleurs à `/sse`"
+  },
+  "servers": [
+    {
+      "url": "https://ragb.hackens.org/api"
+    }
+  ],
+  "paths": {
+    "/values": {
+      "get": {
+        "summary": "Get the colors for all the channels",
+        "operationId": "getValues",
+        "responses": {
+          "200": {
+            "description": "List of colors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Color"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Change multiple colors",
+        "description": "Change multiple colors",
+        "operationId": "changeColors",
+        "security": [
+          {
+            "bearerAuth": [
+              "exp",
+              "scope",
+              "user",
+              "sub"
+            ]
+          }
+        ],
+        "requestBody": {
+          "description": "Colors to change",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "address": {
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "color": {
+                      "$ref": "#/components/schemas/Color"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Color updated successfully",
+            "content": {
+            }
+          }
+        }
+      }
+    },
+    "/values/{id}": {
+      "get": {
+        "summary": "Get channel colors by ID",
+        "operationId": "find color by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of color to fetch",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Color of specific channel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Color"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Changes channel color",
+        "description": "Changes channel color",
+        "operationId": "changeColor",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of color to fetch",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [
+              "exp",
+              "scope",
+              "user",
+              "sub"
+            ]
+          }
+        ],
+        "requestBody": {
+          "description": "Color to change",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Color"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Color updated successfully",
+            "content": {
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Color": {
+        "type": "object",
+        "required": [
+          "red",
+          "green",
+          "blue"
+        ],
+        "properties": {
+          "red": {
+            "type": "integer",
+            "format": "int8"
+          },
+          "green": {
+            "type": "integer",
+            "format": "int8"
+          },
+          "blue": {
+            "type": "integer",
+            "format": "int8"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

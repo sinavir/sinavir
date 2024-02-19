@@ -1,0 +1,29 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block content %}
+{% if not user.is_authenticated %}
+<article>
+  <p>
+  Connectez-vous pour pouvoir modifier des couleurs
+  </p>
+</article>
+{% endif %}
+
+<section>
+  <h1>{{ light_name }}</h1>
+    {% if user.is_authenticated %}
+      <form>
+        <input id="input-light{{lights.id}}" class="input" type="color" name="light{{lights.id}}">
+        <button class="save-color" data-target="{{lights.id}}">Enregistrer</button>
+      </form>
+    {% endif %}
+</section>
+<dialog open id="modal-loading">
+  <article aria-busy="true"></article>
+</dialog>
+<script>const WEBSOCKET_ENDPOINT = "{{ websocket_endpoint }}";</script>
+{% if user.is_authenticated %}
+<script>const JWT = "{{ jwt }}";</script>
+{% endif %}
+<script src="{% static "js/update-color.js" %}" defer></script>
+{% endblock %}

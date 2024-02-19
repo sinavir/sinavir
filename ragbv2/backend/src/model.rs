@@ -1,7 +1,9 @@
 use dotenvy;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::Arc;
+use std::time::Instant;
 use tokio::sync::{broadcast, RwLock};
 
 #[derive(Debug, Deserialize, Serialize, Copy, Clone)]
@@ -27,6 +29,7 @@ impl DMXAtom {
 
 pub struct AppState {
     pub dmx: DMXArray,
+    pub ratelimit_info: HashMap<String, Instant>,
 }
 
 impl AppState {
@@ -40,6 +43,7 @@ impl AppState {
                 };
                 size
             ],
+            ratelimit_info: HashMap::new(),
         }
     }
 }

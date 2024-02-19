@@ -1,0 +1,63 @@
+{% extends "frontend/base.html" %}
+{% load static %}
+{% block content %}
+{% if not user.is_authenticated %}
+<article>
+  <p>
+  Connectez-vous pour pouvoir modifier des couleurs
+  </p>
+</article>
+{% endif %}
+
+<section>
+  <h1>{{ light_name }}</h1>
+  <figure>
+    <svg viewBox="-3.5 -3.5 112 112" version="1.1" id="blinder" >
+      <style>
+        circle {
+          fill: white;
+          stroke: black;
+          stroke-width: 2;
+        }
+        {% if user.is_authenticated %}
+        circle:hover {
+          stroke: grey;
+        }
+        {% endif %}
+      </style>
+      <g id="layer1">
+        <rect style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none" width="110" height="110" x="-2.5" y="-2.5" rx="15" />
+        {% for light in lights %}
+        <circle id="light{{ light.id }}" r="10" cx="{{ light.position_x }}" cy="{{ light.position_y }}" data-target="modal-light{{ light.id }}" class="modal-trigger"/>
+        {% endfor %}
+      </g>
+    </svg>
+  </figure>
+</section>
+{% if user.is_authenticated %}
+{% for light in lights %}
+<dialog id="modal-light{{light.id}}">
+  <article>
+    <header>
+      <button class="close-modal" rel="prev" aria-label="close"></button>
+      <h3>Couleur du pixel n°{{light.id}}</h3>
+    </header>
+    <section>
+      <form>
+        <input id="input-light{{light.id}}" class="input" type="color" name="light{{light.id}}">
+        <button class="save-color" data-target="{{light.id}}">Enregistrer</button>
+      </form>
+    </section>
+  </article>
+</dialog>
+{% endfor %}
+{% endif %}
+<dialog open id="modal-loading">
+  <article aria-busy="true"></article>
+</dialog>
+<script>const WEBSOCKET_ENDPOINT = "{{ websocket_endpoint }}";</script>
+{% if user.is_authenticated %}
+<script>const JWT = "{{ jwt }}";</script>
+{% endif %}
+<script src="{% static "js/update-color.js" %}" defer></script>
+{% endblock %}

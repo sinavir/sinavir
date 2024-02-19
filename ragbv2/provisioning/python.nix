@@ -13,18 +13,12 @@ in
 python.withPackages (ps: [
   ps.django
   ps.gunicorn
-  ps.djangorestframework
   ps.authens
+  ps.pyjwt
   ps.requests
   ps.pyjecteur
-  ps.python-dotenv
-  ps.websockets
-  ps.pyyaml
   ps.uritemplate
   ps.colour
-  ps.django-solo
-  ps.django-redis
-  ps.aioredis
   ps.psycopg
   ps.django-debug-toolbar
 ] ++ lib.optionals debug [

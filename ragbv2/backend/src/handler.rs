@@ -4,10 +4,9 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::{sse::Event, IntoResponse, Sse},
-    Json,
+    Extension, Json,
 };
-use std::slice::Iter;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tokio_stream::StreamExt;
 use tokio_stream::{self as stream};
 
@@ -29,9 +28,12 @@ pub async fn list_values_handler(State(db): State<DB>) -> impl IntoResponse {
 #[debug_handler]
 pub async fn batch_edit_value_handler(
     State(db): State<DB>,
+    //Extension(user): Extension<String>,
     Json(body): Json<Vec<DMXAtom>>,
 ) -> Result<(), StatusCode> {
     let mut lock = db.mut_state.write().await;
+    //if lock.ratelimit_info[&user].elapsed() > Duration::from_secs(1) {
+    //    return Err(StatusCode::
     for i in &body {
         check_id(i.address, &lock.dmx)?;
     }
@@ -42,6 +44,7 @@ pub async fn batch_edit_value_handler(
             Err(_) => (),
         }
     }
+    //lock.ratelimit_info.insert(user, Instant::now());
 
     Ok(())
 }
