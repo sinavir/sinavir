@@ -5,4 +5,5 @@ let
       (builtins.readFile (../../../shared/pubkeys + "/${user}.keys")));
 in {
   "vpn_preauth.age".publicKeys = (readPubkeys "maurice") ++ (readPubkeys "capella");
+  "wifi.age".publicKeys = (readPubkeys "maurice") ++ (readPubkeys "capella");
 }
