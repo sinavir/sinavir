@@ -13,6 +13,12 @@
         st = "status";
         lg = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all";
       };
+      sendemail = {
+	smtpserver = "mail.sinavir.fr";
+	smtpuser = "sinavir@sinavir.fr";
+	smtpencryption = "ssl";
+        smtpserverport = 465;
+      };
     };
   };
 }
