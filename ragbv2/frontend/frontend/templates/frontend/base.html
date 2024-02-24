@@ -5,11 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark" />
-    <link rel="stylesheet" href="{% static "css/pico.amber.min.css" %}">
+    <link rel="stylesheet" href="{% static "css/pico.pumpkin.min.css" %}">
     <title>R/AGB</title>
     <link rel="shortcut icon" type="image/png" href="{% static 'media/logo.png' %}">
-    <link rel="stylesheet" href="{% static "vendor/fontawesome/css/fontawesome.min.css" %}" type="text/css" media="screen" charset="utf-8">
-    <link rel="stylesheet" href="{% static "vendor/fontawesome/css/solid.min.css" %}" type="text/css" media="screen" charset="utf-8">
   </head>
   <body>
     <header class="container">
@@ -39,7 +37,7 @@
             </li>
             <li>
               <button>
-                <i class="fa-solid fa-user"></i>&nbsp;{{ user.username }}
+                🧑&nbsp;{{ user.username }}
               </button>
             </li>
             {% else %}
