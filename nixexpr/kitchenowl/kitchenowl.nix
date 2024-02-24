@@ -88,7 +88,7 @@ stdenv.mkDerivation (finalAttrs: {
     ps.flake8
     ps.flask
     (callPackage ./flask-apscheduler.nix {})
-    ps.flask-basicauth
+    (callPackage ./flask-basicauth.nix {})
     ps.flask-bcrypt
     ps.flask-jwt-extended
     ps.flask-migrate
