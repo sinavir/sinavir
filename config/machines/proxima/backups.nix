@@ -17,9 +17,7 @@ in {
         source_directories = [
           "/var/vmail"
         ];
-        repositories = [{
-          path= "ssh://borg@${bkhost}/./mails";
-        }];
+        repositories = ["ssh://borg@${bkhost}/./mails"];
         keep_daily = 7;
         keep_weekly = 1;
         keep_monthly = 4;
