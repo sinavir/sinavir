@@ -1,4 +1,5 @@
-/ragb-backend/target
+/backend/target
+/frontend/db.sqlite3
 # general things to ignore
 build/
 dist/
