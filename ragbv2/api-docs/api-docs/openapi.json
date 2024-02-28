@@ -3,11 +3,11 @@
   "info": {
     "version": "1.0.0",
     "title": "R/AGB",
-    "description": "Une API pour choisir les couleurs en agb. Il existe un endpoint SSE pour être notifié des mises à jour des couleurs à `/sse`"
+    "description": "Une API pour choisir les couleurs en agb. Il existe un endpoint SSE pour être notifié des mises à jour des couleurs à l'addresse [https://agb.hackens.org/api/sse](https://agb.hackens.org/api/sse). Une description du plan d'addressage au format JSON est disponible: [/api-docs/patch.json](/api-docs/patch.json)"
   },
   "servers": [
     {
-      "url": "https://ragb.hackens.org/api"
+      "url": "https://agb.hackens.org/api"
     }
   ],
   "paths": {

@@ -7,22 +7,22 @@
     },
     "screen_left": {
       "name": "Ecran-gauche",
-      "kind": "tradi",
+      "kind": "spot",
       "channels": [ 16 ]
     },
     "screen_right": {
       "name": "Ecran-droite",
-      "kind": "tradi",
+      "kind": "spot",
       "channels": [ 17 ]
     },
     "wall_left": {
       "name": "Mur gauche",
-      "kind": "tradi",
+      "kind": "spot",
       "channels": [ 34 ]
     },
     "wall_right": {
       "name": "Mur droite",
-      "kind": "tradi",
+      "kind": "spot",
       "channels": [ 35 ]
     },
     "barre_led_0": {

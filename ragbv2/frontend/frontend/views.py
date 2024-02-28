@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ViewDoesNotExist
-from django.http import Http404
+from django.http import Http404, JsonResponse
+from django.views import View
 from django.views.generic.base import TemplateView
 from ragb.settings import JWT_SECRET, LIGHTS, WEBSOCKET_ENDPOINT
 
@@ -27,13 +29,30 @@ def get_context_from_proj(kind, chans):
                 }
                 for i in range(len(chans))
             ]
-        case "tradi":
+        case "spot":
             return {
                 "id": chans[0],
             }
 
         case _:
             raise ViewDoesNotExist()
+
+
+class TokenView(View, LoginRequiredMixin):
+    def get(self, request, *arg, **kwargs):
+        return JsonResponse(
+            {
+                "token": jwt.encode(
+                    {
+                        "exp": datetime.now(tz=timezone.utc) + timedelta(hours=9),
+                        "sub": "ragb",
+                        "user": self.request.user.username,
+                        "scope": "modify",
+                    },
+                    JWT_SECRET,
+                )
+            }
+        )
 
 
 class LightView(TemplateView):

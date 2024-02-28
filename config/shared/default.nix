@@ -1,13 +1,10 @@
 {...}: {
   imports = [
     #./auto-upgrade.nix
-    ./git-config.nix
-    ./nix-conf.nix
-    ./programs.nix
+    ./minimal-shared.nix
+    ./git-config.nix # contains personal stuff
     ./secrets
-    ./ssh.nix
     ./syncthing.nix
-    ./users.nix
     ./nginx.nix
   ];
 }

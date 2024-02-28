@@ -31,7 +31,7 @@ SECRET_KEY_FILE = os.environ.get("SECRET_KEY_FILE", "")
 if SECRET_KEY_FILE != "":
     try:
         with open(SECRET_KEY_FILE, encoding="utf-8") as f:
-            SECRET_KEY = f.read()
+            SECRET_KEY = f.read().strip()
     except:
         logging.warning(f"Not able to open SECRET_KEY_FILE: {SECRET_KEY_FILE}")
 
@@ -41,7 +41,7 @@ JWT_SECRET_FILE = os.environ.get("JWT_SECRET_FILE", "")
 if JWT_SECRET_FILE != "":
     try:
         with open(JWT_SECRET_FILE, encoding="utf-8") as f:
-            JWT_SECRET = f.read()
+            JWT_SECRET = f.read().strip()
     except:
         logging.warning(f"Not able to open JWT_SECRET_FILE: {JWT_SECRET_FILE}")
 
@@ -51,7 +51,7 @@ DEV_KEY_FILE = os.environ.get("DEV_KEY_FILE", "")
 if DEV_KEY_FILE != "":
     try:
         with open(DEV_KEY_FILE, encoding="utf-8") as f:
-            DEV_KEY = f.read()
+            DEV_KEY = f.read().strip()
     except:
         logging.warning(f"Not able to open DEV_KEY_FILE: {DEV_KEY_FILE}")
 
@@ -232,4 +232,4 @@ STATIC_ROOT = os.environ.get("STATIC_ROOT", "static/")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LIGHTS = json.load(open(BASE_DIR / "../patch.json"))
+LIGHTS = json.load(open(BASE_DIR / "patch.json"))

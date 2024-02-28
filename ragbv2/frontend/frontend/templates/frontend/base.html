@@ -24,6 +24,9 @@
             <li class="hide-before-sm">
               <a class="contrast" href="{% url "frontend:home" %}">Accueil</a>
             </li>
+            <li class="hide-before-sm">
+              <a class="contrast" href="/api-docs/">API</a>
+            </li>
             {% if user.is_staff %}
             <li class="hide-before-sm">
               <a class="contrast" href="{% url "admin:index" %}">Admin</a>

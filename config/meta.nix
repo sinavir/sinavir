@@ -53,6 +53,14 @@ let
         imports = [agenix];
         arch = "aarch64-linux";
       };
+      bakham = {
+        deployment = {
+          targetHost = "10.10.10.5";
+          tags = [ "real" ];
+        };
+        imports = [agenix];
+        arch = "aarch64-linux";
+      };
       nekkar = {
         deployment = {
           targetHost = null;
