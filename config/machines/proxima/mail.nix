@@ -3,9 +3,7 @@
   pkgs,
   ...
 }: {
-  imports = [
-    <nixos-mailserver>
-  ];
+  services.dovecot2.sieve.extensions = [ "fileinto" ];
 
   mailserver = {
     enable = true;

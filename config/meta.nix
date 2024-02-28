@@ -2,6 +2,7 @@ let
   sources = import ./npins;
 
   agenix = sources.agenix + "/modules/age.nix";
+  snm = sources.nixos-mailserver + "/default.nix";
   home-manager = sources.home-manager + "/nixos";
 
   metadata = {
@@ -19,7 +20,7 @@ let
           targetHost = "proxima";
           tags = [ "real" ];
         };
-        imports = [agenix];
+        imports = [snm agenix];
       };
       algedi = {
         deployment = {
