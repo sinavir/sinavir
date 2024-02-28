@@ -7,6 +7,8 @@ in {
   "vpn_preauth.age".publicKeys =
     (readPubkeys "maurice")
     ++ (readPubkeys "schedar");
+  "ragb.age".publicKeys = (readPubkeys "maurice") ++ (readPubkeys "schedar");
+  "ragbJWT.age".publicKeys = (readPubkeys "maurice") ++ (readPubkeys "schedar");
   "netbox.age".publicKeys =
     (readPubkeys "maurice")
     ++ (readPubkeys "schedar");

@@ -25,7 +25,7 @@ mail._domainkey         IN TXT    ( "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA
 
 kitchenowl              IN CNAME  schedar
 status                  IN CNAME  schedar
-agb                     IN CNAME  algedi
+agb                     IN CNAME  schedar
 josh                    IN CNAME  schedar
 netbox.dgnum            IN CNAME  schedar
 auth                    IN CNAME  proxima

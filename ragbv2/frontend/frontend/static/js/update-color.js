@@ -16,7 +16,7 @@ function rgbToHex({red, green, blue}) {
   return "#" + componentToHex(red) + componentToHex(green) + componentToHex(blue);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+let startSocket = () => {
   const socket = new EventSource(`${WEBSOCKET_ENDPOINT}/sse`);
 
   socket.addEventListener("message", (event) => {
@@ -35,8 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   socket.addEventListener("error", (event) => {
     console.error(event);
+    startSocket();
   });
-});
+};
+
+document.addEventListener('DOMContentLoaded', startSocket);
 
 
 document.addEventListener('DOMContentLoaded', () => {

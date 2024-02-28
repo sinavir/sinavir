@@ -16,8 +16,8 @@ def get_context_from_proj(kind, chans):
             return [
                 {
                     "id": chans[i],
-                    "position_x": (i // 4) * 25 + 15,
-                    "position_y": (i % 4) * 25 + 15,
+                    "position_y": ((15 - i) // 4) * 25 + 15,
+                    "position_x": ((15 - i) % 4) * 25 + 15,
                 }
                 for i in range(len(chans))
             ]

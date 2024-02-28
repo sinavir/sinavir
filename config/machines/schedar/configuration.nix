@@ -16,6 +16,7 @@
       ./uptime-kuma.nix
       ./secrets
       ../../shared
+      ./ragb.nix
       ./hardware-configuration.nix
       ./kfet-open-recorder.nix
     ];

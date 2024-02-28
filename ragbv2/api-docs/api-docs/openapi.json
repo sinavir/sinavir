@@ -3,7 +3,7 @@
   "info": {
     "version": "1.0.0",
     "title": "R/AGB",
-    "description": "Une API pour choisir les couleurs en agb. Il existe un endpoint SSE pour être notifié des mises à jour des couleurs à l'addresse [https://agb.hackens.org/api/sse](https://agb.hackens.org/api/sse). Une description du plan d'addressage au format JSON est disponible: [/api-docs/patch.json](/api-docs/patch.json)"
+    "description": "Une API pour choisir les couleurs en agb. Il existe un endpoint SSE pour être notifié des mises à jour des couleurs à l'addresse [https://agb.hackens.org/api/sse](https://agb.hackens.org/api/sse). Une description du plan d'addressage au format JSON est disponible: [/api-docs/patch.json](/api-docs/patch.json). On peut récupérer le token d'API à l'addresse: [/token](/token)."
   },
   "servers": [
     {
@@ -33,7 +33,7 @@
       },
       "post": {
         "summary": "Change multiple colors",
-        "description": "Change multiple colors",
+        "description": "Change multiple colors. This request has a cooldown of 500ms.",
         "operationId": "changeColors",
         "security": [
           {
@@ -59,7 +59,7 @@
                       "type": "integer",
                       "format": "int64"
                     },
-                    "color": {
+                    "value": {
                       "$ref": "#/components/schemas/Color"
                     }
                   }
@@ -71,6 +71,11 @@
         "responses": {
           "200": {
             "description": "Color updated successfully",
+            "content": {
+            }
+          },
+          "429": {
+            "description": "You're being rate-limited",
             "content": {
             }
           }

@@ -27,13 +27,16 @@ fn check_token(token: &str, jwt: &str) -> Option<User> {
     );
     match decoded_token {
         Ok(token_data) => {
+            let user =token_data.claims.user;
             if token_data.claims.scope == "modify" {
-                Some(token_data.claims.user)
+                tracing::info!("Successful auth {user:?}");
+                Some(user)
             } else {
+                tracing::debug!("Failed auth: {user:?} don't have modify scope");
                 None
             }
         }
-        Err(_) => None,
+        Err(err) => {tracing::debug!("Failed decoding token: {err:?}"); None},
     }
 }
 
