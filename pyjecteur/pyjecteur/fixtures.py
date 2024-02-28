@@ -47,7 +47,7 @@ class Tradi(AbstractLight):
 
     address_size = 3
 
-    color = RColor(Color("black"), 3)
+    color = RColor(Color("black"), 0)
 
 
 class ParMKII(AbstractLight):

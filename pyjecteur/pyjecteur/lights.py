@@ -104,7 +104,7 @@ class AbstractLight:
         """
         Automatically update dmx when a fixture param is set
         """
-        if isinstance(self.__dict__[name], ReactiveMixin):
+        if name in self.__dict__ and isinstance(self.__dict__[name], ReactiveMixin):
             self.__dict__[name].set_all(value)
             self.attr_set_hook(name, value)
             return
