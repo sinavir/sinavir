@@ -12,6 +12,14 @@
     agenix = self.callPackage ((import ../npins).agenix + "/pkgs/agenix.nix") {};
   })
   (self: super: {
+    arkheon-frontend = self.callPackage ./arkheon-frontend.nix {};
+    python3 = super.python3.override {
+      packageOverrides = py-self: py-super: {
+        arkheon = py-self.callPackage ./arkheon-backend.nix {};
+      };
+    };
+  })
+  (self: super: {
     nixosAnywhere = self.callPackage (
       (import ../npins).nixos-anywhere + "/src"
     ) {};
