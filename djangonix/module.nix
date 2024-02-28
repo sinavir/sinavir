@@ -24,6 +24,11 @@
       src = lib.mkOption {
         type = lib.types.path;
       };
+      sourceRoot = lib.mkOption {
+        type = lib.types.str;
+        default = name;
+        description = "Dir in source to find the django code (must point to basedir of manage.py)";
+      };
       settings = lib.mkOption {
         type = lib.types.submodule {
           freeformType = with lib.types; attrsOf anything;
@@ -71,7 +76,7 @@
       };
       manageFilePath = lib.mkOption {
         type = lib.types.str;
-        default = "${name}/manage.py";
+        default = "${config.sourceRoot}/manage.py";
         description = "Path relative to src pointing to manage.py file";
       };
       pythonPackage = lib.mkOption {
@@ -108,7 +113,7 @@ in {
           source ${cfg.envFile}
           ${cfg.managePy.managePy}/bin/manage-${app} migrate
           ${cfg.pythonPackage}/bin/gunicorn ${app}.wsgi \
-              --pythonpath ${cfg.src}/${app} \
+              --pythonpath ${cfg.src}/${cfg.sourceRoot} \
               -b 127.0.0.1:${toString cfg.port} \
               --workers=${toString cfg.processes} \
               --threads=${toString cfg.threads}
