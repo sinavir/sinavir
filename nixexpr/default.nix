@@ -1,4 +1,4 @@
-{ nixpkgs ? (import ./npins).nixpkgs, pkgs ? import nixpkgs {} }:
+{ nixpkgs ? <nixpkgs>, pkgs ? import nixpkgs {} }:
 {
   pyzo = pkgs.python3Packages.callPackage ./pyzo.nix {};
   x32edit = pkgs.callPackage ./x32edit.nix {
