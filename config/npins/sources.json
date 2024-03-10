@@ -12,6 +12,18 @@
       "url": "https://github.com/ryantm/agenix/archive/8cb01a0e717311680e0cbca06a76cbceba6f3ed6.tar.gz",
       "hash": "1ypp731d2h7i8fj5g2pdapwcrrk6ycxwzpvam045qxiajjdp01rw"
     },
+    "arkheon": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "sinavir",
+        "repo": "arkheon"
+      },
+      "branch": "package_everything",
+      "revision": "2697873ded0104535e670e6c06710f52aea0b92a",
+      "url": "https://github.com/sinavir/arkheon/archive/2697873ded0104535e670e6c06710f52aea0b92a.tar.gz",
+      "hash": "0winjw31wr4gzvivvl40a5y55v18hsgdgd4s6s87dh4vjpnxg72x"
+    },
     "disko": {
       "type": "Git",
       "repository": {
@@ -20,9 +32,9 @@
         "repo": "disko"
       },
       "branch": "master",
-      "revision": "1ae1f57dad13595600dd57b6a55fcbaef6673804",
-      "url": "https://github.com/nix-community/disko/archive/1ae1f57dad13595600dd57b6a55fcbaef6673804.tar.gz",
-      "hash": "0fr6xki5rd249f2423y1p50q0qrqary9w6ssvc14nklkjyrc92ar"
+      "revision": "cf185d687f382ef11427bcf41fff8e3aef83d294",
+      "url": "https://github.com/nix-community/disko/archive/cf185d687f382ef11427bcf41fff8e3aef83d294.tar.gz",
+      "hash": "0l7jgycvvyxcly1hw06y34l39w8qj07b8nx0lrgmjpr40xjpv1i4"
     },
     "dns.nix": {
       "type": "GitRelease",
@@ -46,9 +58,9 @@
         "repo": "home-manager"
       },
       "branch": "master",
-      "revision": "517601b37c6d495274454f63c5a483c8e3ca6be1",
-      "url": "https://github.com/nix-community/home-manager/archive/517601b37c6d495274454f63c5a483c8e3ca6be1.tar.gz",
-      "hash": "1pggqxc1xbfwlq10y0qy0xg76w5l28yy0qzwbrklg656vgq7f1mn"
+      "revision": "bdea159ffab9865f808b8d92fd2bef33521867b2",
+      "url": "https://github.com/nix-community/home-manager/archive/bdea159ffab9865f808b8d92fd2bef33521867b2.tar.gz",
+      "hash": "1zszr2wd4d7qp25fn6yb1fss8snp2ql0xhvm1xiya51plg8dm1cw"
     },
     "nixos-anywhere": {
       "type": "Git",
@@ -58,9 +70,9 @@
         "repo": "nixos-anywhere"
       },
       "branch": "main",
-      "revision": "4c94cecf3dd551adf1359fb06aa926330f44e5a6",
-      "url": "https://github.com/numtide/nixos-anywhere/archive/4c94cecf3dd551adf1359fb06aa926330f44e5a6.tar.gz",
-      "hash": "10875gfiv4l3k776ldgs4crxc8d1c448iriz4iw3x9jammkh28w4"
+      "revision": "31c945ed58a3accbf86b0cf82e5e49fa4db62407",
+      "url": "https://github.com/numtide/nixos-anywhere/archive/31c945ed58a3accbf86b0cf82e5e49fa4db62407.tar.gz",
+      "hash": "1p8gikzpgya0n8igrnklx8rapvi62ca3xqb6dgwxchp38rb5y00l"
     },
     "nixos-mailserver": {
       "type": "Git",
@@ -81,9 +93,9 @@
         "repo": "nixpkgs"
       },
       "branch": "nixos-unstable",
-      "revision": "b98a4e1746acceb92c509bc496ef3d0e5ad8d4aa",
-      "url": "https://github.com/NixOS/nixpkgs/archive/b98a4e1746acceb92c509bc496ef3d0e5ad8d4aa.tar.gz",
-      "hash": "09pzhl3382ndmxhkiddqkz7g4qxcga2r37dyxlr0ad6qszrph88p"
+      "revision": "b8697e57f10292a6165a20f03d2f42920dfaf973",
+      "url": "https://github.com/NixOS/nixpkgs/archive/b8697e57f10292a6165a20f03d2f42920dfaf973.tar.gz",
+      "hash": "1pamq9g3z031sqpy0xi1kv954l5b7m89f3xncp9mkshmqngp98cz"
     },
     "nixos-unstable": {
       "type": "Git",
@@ -93,9 +105,9 @@
         "repo": "nixpkgs"
       },
       "branch": "nixos-unstable",
-      "revision": "b98a4e1746acceb92c509bc496ef3d0e5ad8d4aa",
-      "url": "https://github.com/NixOS/nixpkgs/archive/b98a4e1746acceb92c509bc496ef3d0e5ad8d4aa.tar.gz",
-      "hash": "09pzhl3382ndmxhkiddqkz7g4qxcga2r37dyxlr0ad6qszrph88p"
+      "revision": "b8697e57f10292a6165a20f03d2f42920dfaf973",
+      "url": "https://github.com/NixOS/nixpkgs/archive/b8697e57f10292a6165a20f03d2f42920dfaf973.tar.gz",
+      "hash": "1pamq9g3z031sqpy0xi1kv954l5b7m89f3xncp9mkshmqngp98cz"
     }
   },
   "version": 3
