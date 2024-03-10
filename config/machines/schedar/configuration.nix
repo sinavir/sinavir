@@ -13,6 +13,7 @@
       ./networking.nix
       ./kitchenowl.nix
       ./ernestophone.nix
+      ./tandoor.nix
       ./uptime-kuma.nix
       ./secrets
       ../../shared

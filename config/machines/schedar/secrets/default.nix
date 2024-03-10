@@ -6,6 +6,8 @@
 }: {
   age.secrets = {
     "vpn_preauth".file = ./vpn_preauth.age;
+    "tandoorSecret".file = ./tandoor-secret.age;
+    "tandoorEnv".file = ./tandoor-env.age;
     "ragb".file = ./ragb.age;
     "ragbJWT".file = ./ragbJWT.age;
     "tsigNS2" = {
