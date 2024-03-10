@@ -4,6 +4,7 @@ let
   agenix = sources.agenix + "/modules/age.nix";
   snm = sources.nixos-mailserver + "/default.nix";
   home-manager = sources.home-manager + "/nixos";
+  arkheon = ../external/mimir/module.nix;
 
   metadata = {
     nodes = {
@@ -42,7 +43,7 @@ let
           #buildOnTarget = true;
           tags = [ "real" ];
         };
-        imports = [agenix];
+        imports = [arkheon agenix];
         arch = "aarch64-linux";
       };
       rigel = {

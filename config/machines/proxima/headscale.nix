@@ -16,6 +16,13 @@
         #magic_dns = true;
         override_local_dns = true;
         nameservers = ["1.1.1.1"];
+        extra_records = [
+          {
+            name = "arkheon.vpn";
+            type = "A";
+            value = "100.64.0.2";
+          }
+        ];
       };
 
       ip_prefixes = [
