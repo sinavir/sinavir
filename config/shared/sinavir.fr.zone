@@ -29,6 +29,7 @@ agb                     IN CNAME  schedar
 josh                    IN CNAME  schedar
 netbox.dgnum            IN CNAME  schedar
 auth                    IN CNAME  proxima
+sso                     IN CNAME  proxima
 irc                     IN CNAME  proxima
 kfet                    IN CNAME  proxima
 pass                    IN CNAME  proxima
