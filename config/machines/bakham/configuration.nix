@@ -27,7 +27,7 @@
         pkgs.curl
         (pkgs.callPackage ../../../ragbv2/provisioning/python.nix {})
       ];
-      text = "curl -s -n "https://agb.hackens.org/api/sse" | python ${../../../ragbv2/client/script.py} $out/bin/run-gw";
+      text = "curl -s -n https://agb.hackens.org/api/sse | python ${../../../ragbv2/client/script.py}";
     })
   ];
 

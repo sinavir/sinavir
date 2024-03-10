@@ -6,6 +6,8 @@
         name = "sinavir";
         email = "sinavir@sinavir.fr";
       };
+      rerere.enable = true;
+      column.ui = "auto";
       alias = {
         co = "checkout";
         ci = "commit";

@@ -19,6 +19,7 @@ in {
     ./ssh-config.nix
     ./sway
     ./rbw.nix
+    ./git.nix
   ];
   services = {
     gpg-agent.enable = true;
@@ -86,7 +87,7 @@ in {
     libreoffice
     mako
     mpv
-    musescore
+    #musescore # failing
     pavucontrol
     pulsemixer
     signal-desktop

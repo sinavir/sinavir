@@ -7,6 +7,7 @@
   imports = [../../modules/tailscale.nix];
 
   networking.useDHCP = false;
+  systemd.network.wait-online.anyInterface = true;
 
   systemd.network = {
     enable = true;

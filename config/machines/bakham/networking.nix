@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: {
-  networking.useDHCP = true;
+  networking.useDHCP = false;
 
   networking.wireless.userControlled.enable = true;
   networking.wireless.enable = true;
@@ -13,10 +13,6 @@
     enable = true;
 
     networks = {
-      "99-ethernet-default-dhcp" = {
-        matchConfig.Name = ["en*" "eth*"];
-        DHCP = "yes";
-      };
       "10-uplink" = {
         name = "enu1u1";
         DHCP = "yes";
